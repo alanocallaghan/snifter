@@ -20,10 +20,11 @@ Basic usage of the function returns a matrix of t-SNE coordinates.
 
 We can also project new points into an existing embedding.
 
-    snifter <- fi_tsne(m[-(1:2), ], random_state = 42L)
+    n <- 20
+    snifter <- fi_tsne(m[-(1:n), ], random_state = 42L)
     plot(snifter, pch = 19, col = "black",
         xlab = "t-SNE 1", ylab = "t-SNE 2")
-    new <- project(snifter, m[1:2, ], old = m[-c(1:2), ])
+    new <- project(snifter, m[1:n, ], old = m[-c(1:n), ])
     points(new, pch = 19, col = "red")
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
