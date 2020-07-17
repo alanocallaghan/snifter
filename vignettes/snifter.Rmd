@@ -1,0 +1,161 @@
+---
+title: "Introduction to snifter"
+author:
+  - name: Alan O'Callaghan
+    email: alan.ocallaghan@outlook.com
+package: snifter
+output:
+  BiocStyle::html_document:
+    toc_float: yes
+vignette: >
+  %\VignetteIndexEntry{Introduction to snifter}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    error = FALSE,
+    warning=FALSE,
+    message=FALSE,
+    collapse = TRUE,
+    comment = "#>"
+)
+library("BiocStyle")
+```
+
+# Introduction
+
+snifter provides an R wrapper for the [openTSNE](https://opentsne.readthedocs.io/en/latest/)
+implementation of fast interpolated t-SNE (FI-tSNE).
+It is based on `r Biocpkg("basilisk")` and `r CRANpkg("reticulate")`.
+This vignette aims to provide a brief overview of typical use 
+when applied to scRNAseq data, but it does not provide a comprehensive
+guide to the available options in the package.
+
+It is highly advisable to review the documentation in snifter and the 
+[openTSNE documentation](https://opentsne.readthedocs.io/en/latest/)
+to gain a full understanding of the available options.
+
+# Setting up the data
+
+We will illustrate the use of snifter
+using data from `r Biocpkg("scRNAseq")` and
+single cell utility functions provided by `r Biocpkg("scuttle")`,
+`r Biocpkg("scater")` and 
+`r Biocpkg("scran")` - first we load these libraries
+and set a random seed to ensure the t-SNE visualisation is reproducible
+(note: it is good practice to ensure that a t-SNE embedding is robust
+by running the algorithm multiple times).
+
+
+```{r setup}
+library("snifter")
+library("scRNAseq")
+library("scran")
+library("scuttle")
+library("scater")
+set.seed(42)
+```
+
+Before running t-SNE, we first load data generated 
+by [Zeisel et al.](https://doi.org/10.1126/science.aaa1934) 
+from `r Biocpkg("scRNAseq")`. We filter this data to remove genes
+expressed only in a small number of cells,
+estimate normalisation factors using `r Biocpkg("scran")`
+and generate 20 principal components. We will use these principal
+components to generate the t-SNE embedding later.
+
+```{r data}
+data <- ZeiselBrainData()
+data <- data[rowMeans(counts(data) != 0) > 0.05, ]
+data <- computeSumFactors(data, cluster = quickCluster(data))
+data <- logNormCounts(data)
+data <- runPCA(data, ncomponents = 20)
+## Convert this to a factor to use as colouring variable later
+data$level1class <- factor(data$level1class)
+```
+
+# Running t-SNE
+
+The main functionality of the package lies in the `fi_tsne` function.
+This function returns a matrix of t-SNE co-ordinates. In this case,
+we pass in the 20 principal components computed based on the 
+log-normalised counts. We colour points based on the discrete 
+cell types identified by the authors.
+
+```{r run}
+mat <- reducedDim(data)
+snifter <- fi_tsne(mat, random_state = 42L)
+plot(snifter,
+    pch = 19,
+    xlab = "t-SNE 1", ylab = "t-SNE 2",
+    col = as.numeric(data$level1class)
+)
+legend(40, 50,
+    legend = levels(data$level1class),
+    col = seq_len(nlevels(data$level1class)),
+    pch = 19
+)
+```
+
+# Projecting new data into an existing embedding
+
+The openTNSE package, and by extension snifter,
+also allows the embedding of new data into
+an existing t-SNE embedding.
+To do this, the option `as_matrix = FALSE` needs to be specified
+when calling `fi_tsne`. Here, we will split the data into "training"
+and "test" sets. Following this, we generate a t-SNE embedding
+using the training data, and project the test data into this embedding.
+
+```{r split}
+test_ind <- sample(nrow(mat), nrow(mat) / 2)
+train_ind <- setdiff(seq_len(nrow(mat)), test_ind)
+train_mat <- mat[train_ind, ]
+test_mat <- mat[train_ind, ]
+
+train_label <- data$level1class[train_ind]
+test_label <- data$level1class[test_ind]
+
+embedding <- fi_tsne(train_mat, as_matrix = FALSE, random_state = 42L)
+```
+
+The `embedding` object is of class `"openTSNE.tsne.TSNEEmbedding"`
+(it also inherits from `"numpy.ndarray"`). To access the numeric 
+t-SNE co-ordinates, we can simply call `as.matrix`. 
+Following generation of the embedding, we can now project the unseen test
+data into this t-SNE embedding.
+
+```{r plot-embed}
+embedding_coords <- as.matrix(embedding)
+new_coords <- embed(embedding, test_mat)
+plot(
+    embedding_coords,
+    pch = 19,
+    col = as.numeric(train_label),
+    xlab = "t-SNE 1", ylab = "t-SNE 2",
+)
+legend(30, 50,
+    legend = levels(data$level1class),
+    col = seq_len(nlevels(data$level1class)),
+    pch = 19
+)
+points(
+    new_coords,
+    pch = 15,
+    col = as.numeric(test_label)
+)
+legend(30, 30,
+    legend = c("Train", "Test"),
+    pch = c(19, 15)
+)
+```
+
+
+# Session information {.unnumbered}
+
+```{r}
+sessionInfo()
+```
+
