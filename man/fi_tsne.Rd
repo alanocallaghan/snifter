@@ -11,33 +11,120 @@ fi_tsne(x, ...)
   x,
   n_components = 2L,
   n_jobs = 1L,
-  learning_rate = "auto",
   perplexity = 30,
+  n_iter = 500L,
+  initialization = c("pca", "spectral", "random"),
+  neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
+  negative_gradient_method = c("bh", "fft"),
+  learning_rate = "auto",
   early_exaggeration = 250,
   early_exaggeration_iter = 12L,
-  n_iter = 500L,
   exaggeration = NULL,
   dof = 1,
   theta = 0.5,
   n_interpolation_points = 3L,
   min_num_intervals = 50,
   ints_in_interval = 1,
-  initialization = c("pca", "spectral", "random"),
   metric = "euclidean",
   metric_params = NULL,
   initial_momentum = 0.5,
   final_momentum = 0.8,
   max_grad_norm = NULL,
-  neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
-  negative_gradient_method = c("bh", "fft"),
   random_state = NULL,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
+}
+\arguments{
+\item{x}{Input data matrix.}
+
+\item{...}{Unused.}
+
+\item{n_components}{Number of t-SNE components to be produced.}
+
+\item{n_jobs}{Integer scalar specifying the number of corest to be used.}
+
+\item{perplexity}{Numeric scalar controlling the neighborhood used
+when estimating the embedding.}
+
+\item{n_iter}{Integer scalar specifying the number of iterations to complete.}
+
+\item{initialization}{Character scalar specifying the initialization
+to use. "pca" may preserve global distance better than other options.}
+
+\item{neighbors}{Character scalar specifying the nearest neighbour
+algorithm to use.}
+
+\item{negative_gradient_method}{Character scalar specifying the 
+negative gradient approximation to use. "bh", referring to Barnes-Hut,
+is more appropriate for smaller data sets, while "fft" referring
+to fast Fourier transform, is more appropriate.}
+
+\item{learning_rate}{Numeric scalar specifying the learning rate, or the
+string "auto", which uses \code{max(200, N / 12)}, where \code{N} is
+the number of observations.}
+
+\item{early_exaggeration}{Numeric scalar specifying the exaggeration factor
+to use during the early exaggeration phase. Typical values range from 12 to
+32.}
+
+\item{early_exaggeration_iter}{Integer scalar specifying the number of 
+iterations to run in the early exaggeration phase.}
+
+\item{exaggeration}{Numeric scalar specifying the exaggeration factor to use 
+during the normal optimization phase. This can be used to form more densely 
+packed clusters and is useful for large data sets.}
+
+\item{dof}{Numeric scalar specifying the degrees of freedom, as described in
+Kobak et al. “Heavy-tailed kernels reveal a finer cluster structure in t-SNE
+visualisations”, 2019.}
+
+\item{theta}{Numeric scalar, only used when negative_gradient_method="bh". 
+This is the trade-off parameter between speed and accuracy of the tree 
+approximation method. Typical values range from 0.2 to 0.8. The value 0 
+indicates that no approximation is to be made and produces exact results 
+also producing longer runtime.}
+
+\item{n_interpolation_points}{Integer scalar, only used when
+negative_gradient_method="fft". The number of 
+interpolation points to use within each grid cell for interpolation based 
+t-SNE. It is highly recommended leaving this value at the default 3.}
+
+\item{min_num_intervals}{Integer scalar, only used when
+negative_gradient_method="fft". The minimum number of grid cells to use, 
+regardless of the ints_in_interval parameter. Higher values provide more 
+accurate gradient estimations.}
+
+\item{ints_in_interval}{Numeric scalar, only used when
+negative_gradient_method="fft". Indicates how large a grid cell should be
+e.g. a value of 3 indicates a grid side length of 3. Lower values provide 
+more accurate gradient estimations.}
+
+\item{metric}{Character scalar specifying the metric to be used to compute 
+affinities between points in the original space.}
+
+\item{metric_params}{Named list of additional keyword arguments for the 
+metric function.}
+
+\item{initial_momentum}{Numeric scalar specifying the momentum to use during
+the early exaggeration phase.}
+
+\item{final_momentum}{Numeric scalar specifying the momentum to use during 
+the normal optimization phase.}
+
+\item{max_grad_norm}{Numeric scalar specifying the maximum gradient norm. 
+If the norm exceeds this value, it will be clipped.
+This is most beneficial}
+
+\item{random_state}{Integer scalar specifying the seed used by the random
+number generator.}
+
+\item{verbose}{Logical scalar controlling verbosity.}
 }
 \value{
 A matrix of t-SNE embeddings.
 }
 \description{
-Run FI-tSNE algorithm
+See [the openTSNE documentation](https://opentsne.readthedocs.io/en/latest/)
+for further details on these arguments and the general usage of this 
+algorithm.
 }

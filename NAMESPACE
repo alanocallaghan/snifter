@@ -2,6 +2,7 @@
 
 S3method(as.matrix,openTSNE.tsne.TSNEEmbedding)
 S3method(embed,openTSNE.tsne.TSNEEmbedding)
+S3method(fi_tsne,data.frame)
 S3method(fi_tsne,matrix)
 S3method(print,openTSNE.tsne.TSNEEmbedding)
 S3method(py_to_r,openTSNE.tsne.TSNEEmbedding)

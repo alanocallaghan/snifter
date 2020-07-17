@@ -1,7 +1,31 @@
+---
+output: md_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# snifter
+
+R binding for [openTSNE](https://opentsne.readthedocs.io/en/latest/index.html)
+using [basilisk](https://bioconductor.org/packages/devel/bioc/html/basilisk.html).
+
+## Example usage
 
 ```{r}
 devtools::load_all()
+set.seed(42)
 m <- matrix(rnorm(20000), ncol=20) 
-out <- fi_tsne(m[-(1:2), ])
+out <- fi_tsne(m[-(1:2), ], random_state = 42L)
 embed(out, m[1:2, ])
+
+plot(as.matrix(out), pch = 16)
 ```
