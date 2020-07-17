@@ -2,13 +2,17 @@
 % Please edit documentation in R/fi_tsne.R
 \name{fi_tsne}
 \alias{fi_tsne}
+\alias{snifter}
 \alias{fi_tsne.matrix}
 \title{Run FI-tSNE algorithm}
 \usage{
 fi_tsne(x, ...)
 
+snifter(x, ...)
+
 \method{fi_tsne}{matrix}(
   x,
+  as_matrix = TRUE,
   n_components = 2L,
   n_jobs = 1L,
   perplexity = 30,
@@ -38,6 +42,12 @@ fi_tsne(x, ...)
 \item{x}{Input data matrix.}
 
 \item{...}{Unused.}
+
+\item{as_matrix}{Logical scalar. If \code{TRUE} (default), the fucntion 
+returns a matrix of t-SNE component co-ordinates.
+Otherwise, it returns an R binding to the \code{openTSNE.tsne.TSNEEmbedding}
+object. The latter is useful for embedding (see \code{\link{embed}} for
+more details).}
 
 \item{n_components}{Number of t-SNE components to be produced.}
 
@@ -112,8 +122,7 @@ the early exaggeration phase.}
 the normal optimization phase.}
 
 \item{max_grad_norm}{Numeric scalar specifying the maximum gradient norm. 
-If the norm exceeds this value, it will be clipped.
-This is most beneficial}
+If the norm exceeds this value, it will be clipped.}
 
 \item{random_state}{Integer scalar specifying the seed used by the random
 number generator.}
@@ -121,10 +130,33 @@ number generator.}
 \item{verbose}{Logical scalar controlling verbosity.}
 }
 \value{
-A matrix of t-SNE embeddings.
+A matrix of t-SNE embeddings if \code{as_matrix} is set to 
+\code{TRUE}.
 }
 \description{
 See [the openTSNE documentation](https://opentsne.readthedocs.io/en/latest/)
 for further details on these arguments and the general usage of this 
 algorithm.
+}
+\examples{
+ set.seed(42)
+ m <- matrix(rnorm(20000), ncol=20) 
+ out <- fi_tsne(m, random_state = 42L)
+ plot(out, pch = 19, xlab = "t-SNE 1", ylab = "t-SNE 2")
+
+ ## Using the python binding allows us to embed new points in the existing
+ ## embedding - useful for extremely large data.
+ ## see https://opentsne.readthedocs.io/en/latest/api/index.html
+
+ out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
+ new_points <- embed(out_binding, m[1:2, ])
+ plot(as.matrix(out_binding), col = "black", pch = 19,
+     xlab = "t-SNE 1", ylab = "t-SNE 2")
+ points(new_points, col = "red", pch = 19)
+}
+\references{
+openTSNE: a modular Python library for t-SNE dimensionality reduction and 
+ embedding
+ Pavlin G. Poličar, Martin Stražar, Blaž Zupan
+ bioRxiv 731877; doi: https://doi.org/10.1101/731877
 }

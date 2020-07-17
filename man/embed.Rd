@@ -14,6 +14,19 @@ embed(x, ...)
 
 \item{new}{New data to project into existing embedding}
 }
+\value{
+Numeric matrix of t-SNE co-ordinates resulting from embedding
+ \code{new} into the t-SNE embedding \code{x}.
+}
 \description{
 Embed new data in an existing t-SNE embedding object.
+}
+\examples{
+ set.seed(42)
+ m <- matrix(rnorm(20000), ncol=20) 
+ out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
+ new_points <- embed(out_binding, m[1:2, ])
+ plot(as.matrix(out_binding), col = "black", pch = 19,
+     xlab = "t-SNE 1", ylab = "t-SNE 2")
+ points(new_points, col = "red", pch = 19)
 }

@@ -4,74 +4,105 @@
 #' for further details on these arguments and the general usage of this 
 #' algorithm.
 #' @param x Input data matrix.
+#' @param as_matrix Logical scalar. If \code{TRUE} (default), the fucntion 
+#'  returns a matrix of t-SNE component co-ordinates.
+#'  Otherwise, it returns an R binding to the \code{openTSNE.tsne.TSNEEmbedding}
+#'  object. The latter is useful for embedding (see \code{\link{embed}} for
+#'  more details).
 #' @param n_components Number of t-SNE components to be produced.
 #' @param n_jobs Integer scalar specifying the number of corest to be used.
 #' @param perplexity Numeric scalar controlling the neighborhood used
-#' when estimating the embedding.
+#'  when estimating the embedding.
 #' @param n_iter Integer scalar specifying the number of iterations to complete.
 #' @param initialization Character scalar specifying the initialization
-#' to use. "pca" may preserve global distance better than other options.
+#'  to use. "pca" may preserve global distance better than other options.
 #' @param neighbors Character scalar specifying the nearest neighbour
-#' algorithm to use.
+#'  algorithm to use.
 #' @param negative_gradient_method Character scalar specifying the 
-#' negative gradient approximation to use. "bh", referring to Barnes-Hut,
-#' is more appropriate for smaller data sets, while "fft" referring
-#' to fast Fourier transform, is more appropriate.
+#'  negative gradient approximation to use. "bh", referring to Barnes-Hut,
+#'  is more appropriate for smaller data sets, while "fft" referring
+#'  to fast Fourier transform, is more appropriate.
 #' @param learning_rate Numeric scalar specifying the learning rate, or the
-#' string "auto", which uses \code{max(200, N / 12)}, where \code{N} is
-#' the number of observations.
+#'  string "auto", which uses \code{max(200, N / 12)}, where \code{N} is
+#'  the number of observations.
 #' @param early_exaggeration Numeric scalar specifying the exaggeration factor
-#' to use during the early exaggeration phase. Typical values range from 12 to
-#' 32.
+#'  to use during the early exaggeration phase. Typical values range from 12 to
+#'  32.
 #' @param early_exaggeration_iter Integer scalar specifying the number of 
-#' iterations to run in the early exaggeration phase.
+#'  iterations to run in the early exaggeration phase.
 #' @param exaggeration Numeric scalar specifying the exaggeration factor to use 
-#' during the normal optimization phase. This can be used to form more densely 
-#' packed clusters and is useful for large data sets.
+#'  during the normal optimization phase. This can be used to form more densely 
+#'  packed clusters and is useful for large data sets.
 #' @param dof Numeric scalar specifying the degrees of freedom, as described in
-#' Kobak et al. “Heavy-tailed kernels reveal a finer cluster structure in t-SNE
-#' visualisations”, 2019.
+#'  Kobak et al. “Heavy-tailed kernels reveal a finer cluster structure in t-SNE
+#'  visualisations”, 2019.
 #' @param theta Numeric scalar, only used when negative_gradient_method="bh". 
-#' This is the trade-off parameter between speed and accuracy of the tree 
-#' approximation method. Typical values range from 0.2 to 0.8. The value 0 
-#' indicates that no approximation is to be made and produces exact results 
-#' also producing longer runtime.
+#'  This is the trade-off parameter between speed and accuracy of the tree 
+#'  approximation method. Typical values range from 0.2 to 0.8. The value 0 
+#'  indicates that no approximation is to be made and produces exact results 
+#'  also producing longer runtime.
 #' @param n_interpolation_points Integer scalar, only used when
-#' negative_gradient_method="fft". The number of 
-#' interpolation points to use within each grid cell for interpolation based 
-#' t-SNE. It is highly recommended leaving this value at the default 3.
+#'  negative_gradient_method="fft". The number of 
+#'  interpolation points to use within each grid cell for interpolation based 
+#'  t-SNE. It is highly recommended leaving this value at the default 3.
 #' @param min_num_intervals Integer scalar, only used when
-#' negative_gradient_method="fft". The minimum number of grid cells to use, 
-#' regardless of the ints_in_interval parameter. Higher values provide more 
-#' accurate gradient estimations.
+#'  negative_gradient_method="fft". The minimum number of grid cells to use, 
+#'  regardless of the ints_in_interval parameter. Higher values provide more 
+#'  accurate gradient estimations.
 #' @param ints_in_interval Numeric scalar, only used when
-#' negative_gradient_method="fft". Indicates how large a grid cell should be
-#' e.g. a value of 3 indicates a grid side length of 3. Lower values provide 
-#' more accurate gradient estimations.
+#'  negative_gradient_method="fft". Indicates how large a grid cell should be
+#'  e.g. a value of 3 indicates a grid side length of 3. Lower values provide 
+#'  more accurate gradient estimations.
 #' @param metric Character scalar specifying the metric to be used to compute 
-#' affinities between points in the original space.
+#'  affinities between points in the original space.
 #' @param metric_params Named list of additional keyword arguments for the 
-#' metric function.
+#'  metric function.
 #' @param initial_momentum Numeric scalar specifying the momentum to use during
-#' the early exaggeration phase.
+#'  the early exaggeration phase.
 #' @param final_momentum Numeric scalar specifying the momentum to use during 
-#' the normal optimization phase.
+#'  the normal optimization phase.
 #' @param max_grad_norm Numeric scalar specifying the maximum gradient norm. 
-#' If the norm exceeds this value, it will be clipped.
-#' This is most beneficial 
+#'  If the norm exceeds this value, it will be clipped.
 #' @param random_state Integer scalar specifying the seed used by the random
-#' number generator.
+#'  number generator.
 #' @param verbose Logical scalar controlling verbosity.
 #' @param ... Unused.
-#' @return A matrix of t-SNE embeddings.
+#' @return A matrix of t-SNE embeddings if \code{as_matrix} is set to 
+#' \code{TRUE}.
+#'
+#' @references
+#'  openTSNE: a modular Python library for t-SNE dimensionality reduction and 
+#'  embedding
+#'  Pavlin G. Poličar, Martin Stražar, Blaž Zupan
+#'  bioRxiv 731877; doi: https://doi.org/10.1101/731877  
+#' @examples
+#'  set.seed(42)
+#'  m <- matrix(rnorm(20000), ncol=20) 
+#'  out <- fi_tsne(m, random_state = 42L)
+#'  plot(out, pch = 19, xlab = "t-SNE 1", ylab = "t-SNE 2")
+#' 
+#'  ## Using the python binding allows us to embed new points in the existing
+#'  ## embedding - useful for extremely large data.
+#'  ## see https://opentsne.readthedocs.io/en/latest/api/index.html
+#' 
+#'  out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
+#'  new_points <- embed(out_binding, m[1:2, ])
+#'  plot(as.matrix(out_binding), col = "black", pch = 19,
+#'      xlab = "t-SNE 1", ylab = "t-SNE 2")
+#'  points(new_points, col = "red", pch = 19)
+#' @export
 fi_tsne <- function(x, ...) {
     UseMethod("fi_tsne")
 }
 
+#' @rdname fi_tsne
+#' @export
+snifter <- fi_tsne
 #' @export
 #' @rdname fi_tsne
 fi_tsne.matrix <- function(
-        x, 
+        x,
+        as_matrix = TRUE,
         n_components = 2L,
         n_jobs = 1L,
         perplexity = 30,
@@ -93,7 +124,6 @@ fi_tsne.matrix <- function(
         initial_momentum = 0.5,
         final_momentum = 0.8,
         max_grad_norm = NULL,
-        # max_step_norm = 5,
         random_state = NULL,
         verbose = FALSE
     ) {
@@ -122,13 +152,16 @@ fi_tsne.matrix <- function(
         initial_momentum = initial_momentum,
         final_momentum = final_momentum,
         max_grad_norm = max_grad_norm,
-        # max_step_norm = max_step_norm,
         neighbors = neighbors,
         negative_gradient_method = negative_gradient_method,
         random_state = random_state,
         verbose = verbose
     )
-    obj$fit(x)
+    out <- obj$fit(x)
+    if (as_matrix) {
+        out <- as.matrix(out)
+    }
+    out
 }
 
 #' @export
@@ -140,6 +173,16 @@ fi_tsne.data.frame <- function(x, ...) {
 #' 
 #' @param x t-SNE embedding created with \code{\link{fi_tsne_embedding}}.
 #' @param new New data to project into existing embedding
+#' @return Numeric matrix of t-SNE co-ordinates resulting from embedding
+#'  \code{new} into the t-SNE embedding \code{x}.
+#' @examples
+#'  set.seed(42)
+#'  m <- matrix(rnorm(20000), ncol=20) 
+#'  out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
+#'  new_points <- embed(out_binding, m[1:2, ])
+#'  plot(as.matrix(out_binding), col = "black", pch = 19,
+#'      xlab = "t-SNE 1", ylab = "t-SNE 2")
+#'  points(new_points, col = "red", pch = 19)
 #' @export
 embed <- function(x, ...) {
     UseMethod("embed")
@@ -240,7 +283,6 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
         is.numeric(initial_momentum),
         is.numeric(final_momentum),
         is.null(max_grad_norm) | is.numeric(max_grad_norm),
-        # is.numeric(max_step_norm),
         is.character(neighbors),
         is.character(negative_gradient_method),
         is.null(random_state) | is.integer(random_state),
