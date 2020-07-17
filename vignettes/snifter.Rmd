@@ -7,6 +7,8 @@ package: snifter
 output:
   BiocStyle::html_document:
     toc_float: yes
+    fig_width: 10
+    fig_height: 8
 vignette: >
   %\VignetteIndexEntry{Introduction to snifter}
   %\VignetteEngine{knitr::rmarkdown}
@@ -136,19 +138,19 @@ plot(
     col = as.numeric(train_label),
     xlab = "t-SNE 1", ylab = "t-SNE 2",
 )
-legend(30, 50,
+legend(-40, 40,
     legend = levels(data$level1class),
     col = seq_len(nlevels(data$level1class)),
     pch = 19
 )
 points(
     new_coords,
-    pch = 15,
+    pch = 17,
     col = as.numeric(test_label)
 )
-legend(30, 30,
+legend(-40, 15,
     legend = c("Train", "Test"),
-    pch = c(19, 15)
+    pch = c(19, 17)
 )
 ```
 
