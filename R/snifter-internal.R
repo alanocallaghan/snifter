@@ -1,5 +1,9 @@
+#' @importFrom assertthat assert_that is.count
+#' @importFrom basilisk BasiliskEnvironment basiliskStart
 NULL
 
-#' @importFrom basilisk BasiliskEnvironment
-python_env <- BasiliskEnvironment("fitsne", pkgname="snifter",
-    packages=c("opentsne==0.4.3"))
+python_env <- BasiliskEnvironment(
+    "fitsne",
+    pkgname = "snifter",
+    packages = c("opentsne==0.4.3")
+)
