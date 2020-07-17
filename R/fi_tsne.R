@@ -4,11 +4,6 @@
 #' for further details on these arguments and the general usage of this 
 #' algorithm.
 #' @param x Input data matrix.
-#' @param as_matrix Logical scalar. If \code{TRUE} (default), the fucntion 
-#'  returns a matrix of t-SNE component co-ordinates.
-#'  Otherwise, it returns an R binding to the \code{openTSNE.tsne.TSNEEmbedding}
-#'  object. The latter is useful for embedding (see \code{\link{embed}} for
-#'  more details).
 #' @param n_components Number of t-SNE components to be produced.
 #' @param n_jobs Integer scalar specifying the number of corest to be used.
 #' @param perplexity Numeric scalar controlling the neighborhood used
@@ -66,9 +61,7 @@
 #' @param random_state Integer scalar specifying the seed used by the random
 #'  number generator.
 #' @param verbose Logical scalar controlling verbosity.
-#' @param ... Unused.
-#' @return A matrix of t-SNE embeddings if \code{as_matrix} is set to 
-#' \code{TRUE}.
+#' @return A matrix of t-SNE embeddings.
 #'
 #' @references
 #'  openTSNE: a modular Python library for t-SNE dimensionality reduction and 
@@ -77,32 +70,22 @@
 #'  bioRxiv 731877; doi: https://doi.org/10.1101/731877  
 #' @examples
 #'  set.seed(42)
-#'  m <- matrix(rnorm(20000), ncol=20) 
+#'  m <- matrix(rnorm(2000), ncol=20) 
 #'  out <- fi_tsne(m, random_state = 42L)
 #'  plot(out, pch = 19, xlab = "t-SNE 1", ylab = "t-SNE 2")
 #' 
-#'  ## Using the python binding allows us to embed new points in the existing
+#'  ## openTSNE allows us to project new points into the existing
 #'  ## embedding - useful for extremely large data.
 #'  ## see https://opentsne.readthedocs.io/en/latest/api/index.html
 #' 
-#'  out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
-#'  new_points <- embed(out_binding, m[1:2, ])
+#'  out_binding <- fi_tsne(m[-(1:2), ], random_state = 42L)
+#'  new_points <- project(out_binding, new = m[1:2, ], old = m[-(1:2), ])
 #'  plot(as.matrix(out_binding), col = "black", pch = 19,
 #'      xlab = "t-SNE 1", ylab = "t-SNE 2")
 #'  points(new_points, col = "red", pch = 19)
 #' @export
-fi_tsne <- function(x, ...) {
-    UseMethod("fi_tsne")
-}
-
-#' @rdname fi_tsne
-#' @export
-snifter <- fi_tsne
-#' @export
-#' @rdname fi_tsne
-fi_tsne.matrix <- function(
+fi_tsne <- function(
         x,
-        as_matrix = TRUE,
         n_components = 2L,
         n_jobs = 1L,
         perplexity = 30,
@@ -127,11 +110,12 @@ fi_tsne.matrix <- function(
         random_state = NULL,
         verbose = FALSE
     ) {
+    x <- as.matrix(x)
 
     initialization <- match.arg(initialization)
     neighbors <- match.arg(neighbors)
     negative_gradient_method <- match.arg(negative_gradient_method)
-    obj <- .create_tsne(
+    out <- .create_tsne(
         x = x,
         n_iter = n_iter,
         n_components = n_components,
@@ -157,71 +141,216 @@ fi_tsne.matrix <- function(
         random_state = random_state,
         verbose = verbose
     )
-    out <- obj$fit(x)
-    if (as_matrix) {
-        out <- as.matrix(out)
-    }
-    out
+    structure(
+        .Data = out$x,
+        affinities = out$affinities,
+        n_iter = n_iter,
+        n_components = n_components,
+        n_jobs = n_jobs,
+        learning_rate = learning_rate,
+        perplexity = perplexity,
+        early_exaggeration = early_exaggeration,
+        early_exaggeration_iter = early_exaggeration_iter,
+        exaggeration = exaggeration,
+        dof = dof,
+        theta = theta,
+        n_interpolation_points = n_interpolation_points,
+        min_num_intervals = min_num_intervals,
+        ints_in_interval = ints_in_interval,
+        initialization = initialization,
+        metric = metric,
+        metric_params = metric_params,
+        initial_momentum = initial_momentum,
+        final_momentum = final_momentum,
+        max_grad_norm = max_grad_norm,
+        neighbors = neighbors,
+        negative_gradient_method = negative_gradient_method,
+        class = c("snifter", "matrix")
+    )
 }
 
+#' @rdname fi_tsne
 #' @export
-fi_tsne.data.frame <- function(x, ...) {
-    fi_tsne(as.matrix(x), ...)
-}
+snifter <- fi_tsne
 
-#' Embed new data in an existing t-SNE embedding object.
+
+#' Project new data into an existing t-SNE embedding object.
 #' 
-#' @param x t-SNE embedding created with \code{\link{fi_tsne_embedding}}.
+#' @param x t-SNE embedding created with \code{\link{fi_tsne}}.
 #' @param new New data to project into existing embedding
 #' @return Numeric matrix of t-SNE co-ordinates resulting from embedding
 #'  \code{new} into the t-SNE embedding \code{x}.
+#' @param old Data used to create the original embedding.
+#' @param perplexity Numeric scalar. Perplexity can be thought of 
+#'  as the continuous number of nearest neighbors, for which t-SNE
+#'  will attempt to preserve distances. However, when projecting,
+#'  we only consider neighbors in the existing embedding i.e. 
+#'  each data point is placed into the embedding, independently 
+#'  of other new data points.
+#' @param initialization Character scalar specifying the method 
+#'  used to compute the initial point positions to be used in the
+#'  embedding space. Can be "median", "weighted" or "random".
+#'  In all cases, "median" or "weighted" should be preferred.
+#' @param k The number of nearest neighbors to consider when 
+#'  initially placing the point onto the embedding. This is
+#'  different from "perplexity" because perplexity affects 
+#'  optimization while this only affects the initial point positions.
+#' @param learning_rate The learning rate for t-SNE optimization. 
+#'  When \code{learning_rate="auto"} the appropriate learning rate 
+#'  is selected according to max(200, N / 12), as determined in 
+#'  Belkina et al.
+#' @param early_exaggeration The exaggeration factor to use during 
+#'  the *early exaggeration* phase. Typical values range from 12 to
+#'  32.
+#' @param early_exaggeration_iter The number of iterations to run 
+#'  in the *early exaggeration* phase.
+#' @param exaggeration The exaggeration factor to use during the
+#'  normal optimization phase. This can be used to form more densely
+#'  packed clusters and is useful for large data sets.
+#' @param n_iter The number of iterations to run in the normal 
+#'  optimization regime.
+#' @param initial_momentum The momentum to use during the 
+#'  *early exaggeration* phase.
+#' @param final_momentum The momentum to use during the normal
+#'  optimization phase.
+#' @param max_grad_norm Maximum gradient norm. If the norm exceeds 
+#'  this value, it will be clipped. When adding points into an 
+#'  existing embedding, and the new points 
+#'  overlap with the reference points, this may lead to large 
+#'  gradients. 
+#'  This can make points "shoot off" from the embedding, causing the 
+#'  interpolation method to compute a very large grid, and leads to 
+#'  worse results.
+#' @param tolerance Numeric scalar specifying the numeric tolerance
+#'  used to ensure the affinities calculated on the old data match 
+#'  those of the original embedding.
 #' @examples
 #'  set.seed(42)
-#'  m <- matrix(rnorm(20000), ncol=20) 
-#'  out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
-#'  new_points <- embed(out_binding, m[1:2, ])
+#'  m <- matrix(rnorm(2000), ncol=20) 
+#'  out_binding <- fi_tsne(m[-(1:2), ], random_state = 42L)
+#'  new_points <- project(out_binding, new = m[1:2, ], old = m[-(1:2), ])
 #'  plot(as.matrix(out_binding), col = "black", pch = 19,
 #'      xlab = "t-SNE 1", ylab = "t-SNE 2")
 #'  points(new_points, col = "red", pch = 19)
 #' @export
-embed <- function(x, ...) {
-    UseMethod("embed")
-}
+project <- function(
+        x,
+        new,
+        old,
+        perplexity = 5,
+        initialization = c("median", "weighted", "random"),
+        k = 25L,
+        learning_rate = 0.1,
+        early_exaggeration = 4,
+        early_exaggeration_iter = 0L,
+        exaggeration = 1.5,
+        n_iter = 250L,
+        initial_momentum = 0.5,
+        final_momentum = 0.8,
+        max_grad_norm = 0.25,
+        tolerance = 1e-4
+    ) {
+    stopifnot(inherits(x, "snifter"))
+    stopifnot(ncol(new) == ncol(old))
+    stopifnot(nrow(old) == nrow(x))
+    new <- as.matrix(new)
+    old <- as.matrix(old)
+    initialization <- match.arg(initialization)
 
-#' @export
-#' @rdname embed
-embed.openTSNE.tsne.TSNEEmbedding <- function(x, new) {
     proc <- basiliskStart(python_env)
     basiliskRun(proc,
-        function(x, new) {
-            x$transform(new)
+        function(x,
+                new,
+                old,
+                perplexity,
+                initialization,
+                k,
+                learning_rate,
+                early_exaggeration_iter,
+                early_exaggeration,
+                exaggeration,
+                n_iter,
+                initial_momentum,
+                final_momentum,
+                max_grad_norm,
+                tolerance
+            ) {
+            openTSNE <- reticulate::import("openTSNE")
+            affinities <- openTSNE$affinity$PerplexityBasedNN(
+                old,
+                perplexity = attr(x, "perplexity"),
+                method = attr(x, "neighbors"),
+                metric = attr(x, "metric"),
+                metric_params = attr(x, "metric_params")
+            )
+            affinities$P - attr(x, "affinities")
+            check <- all.equal(
+                as.matrix(affinities$P),
+                as.matrix(attr(x, "affinities")),
+                tolerance = tolerance
+            )
+            if (!check) {
+                stop("Affinities differ from original affinities (tolerance =", tolerance)
+            }
+            args <- list(embedding = x, affinities = affinities)
+            attr <- c(
+                "negative_gradient_method",
+                "dof",
+                "theta",
+                "n_interpolation_points",
+                "min_num_intervals"
+            )
+            attr_args <- lapply(attr, function(parameter) attr(x, parameter))
+            names(attr_args) <- attr
+            args <- c(args, attr_args)
+            x_embedding <- do.call(openTSNE$TSNEEmbedding, args)
+            x_embedding$transform(
+                new,
+                perplexity = perplexity,
+                initialization = initialization,
+                k = k,
+                learning_rate = learning_rate,
+                early_exaggeration = early_exaggeration,
+                early_exaggeration_iter = early_exaggeration_iter,
+                exaggeration = exaggeration,
+                n_iter = n_iter,
+                initial_momentum = initial_momentum,
+                final_momentum = final_momentum,
+                max_grad_norm = max_grad_norm
+            )
         },
         x = x,
-        new = new
+        new = new,
+        old = old,
+        perplexity = perplexity,
+        initialization = initialization,
+        k = k,
+        learning_rate = learning_rate,
+        early_exaggeration = early_exaggeration,
+        early_exaggeration_iter = early_exaggeration_iter,
+        exaggeration = exaggeration,
+        n_iter = n_iter,
+        initial_momentum = initial_momentum,
+        final_momentum = final_momentum,
+        max_grad_norm = max_grad_norm,
+        tolerance = tolerance
     )
 }
 
 #' @export
-print.openTSNE.tsne.TSNEEmbedding <- function(x) {
-    cat("reticulate binding to openTSNE.tsne.TSNEEmbedding.\n")
-    cat("Use as.matrix() for values.\n")
+print.snifter <- function(x, ...) {
+    attributes(x) <- NULL
+    print(as.matrix(x))
 }
-
-#' @export
-as.matrix.openTSNE.tsne.TSNEEmbedding <- function(x) {
-    reticulate:::py_to_r.default(x)
-}
-
 
 #' @importFrom reticulate py_to_r
 #' @export
 py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
     reticulate::py_to_r_wrapper(x)
-}
-
-#' @export
-`[.openTSNE.tsne.TSNEEmbedding` <- function(x, ...) {
-    as.matrix(x)[...]
+    # list(
+    #     affinities = x$affinities$P,
+    #     mat = NextMethod()
+    # )
 }
 
 .create_tsne <- function(
@@ -230,10 +359,16 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
     ) {
     proc <- basiliskStart(python_env)
     basiliskRun(proc,
-        function(...) {
+        function(x, ...) {
             openTSNE <- reticulate::import("openTSNE")
-            openTSNE$TSNE(...)
+            obj <- openTSNE$TSNE(...)
+            out <- obj$fit(x)
+            list(
+                x = reticulate:::py_ref_to_r(out),
+                affinities = out$affinities$P
+            )
         },
+        x = x,
         ...
     )
 }

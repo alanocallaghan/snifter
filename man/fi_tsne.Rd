@@ -3,16 +3,37 @@
 \name{fi_tsne}
 \alias{fi_tsne}
 \alias{snifter}
-\alias{fi_tsne.matrix}
 \title{Run FI-tSNE algorithm}
 \usage{
-fi_tsne(x, ...)
-
-snifter(x, ...)
-
-\method{fi_tsne}{matrix}(
+fi_tsne(
   x,
-  as_matrix = TRUE,
+  n_components = 2L,
+  n_jobs = 1L,
+  perplexity = 30,
+  n_iter = 500L,
+  initialization = c("pca", "spectral", "random"),
+  neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
+  negative_gradient_method = c("bh", "fft"),
+  learning_rate = "auto",
+  early_exaggeration = 250,
+  early_exaggeration_iter = 12L,
+  exaggeration = NULL,
+  dof = 1,
+  theta = 0.5,
+  n_interpolation_points = 3L,
+  min_num_intervals = 50,
+  ints_in_interval = 1,
+  metric = "euclidean",
+  metric_params = NULL,
+  initial_momentum = 0.5,
+  final_momentum = 0.8,
+  max_grad_norm = NULL,
+  random_state = NULL,
+  verbose = FALSE
+)
+
+snifter(
+  x,
   n_components = 2L,
   n_jobs = 1L,
   perplexity = 30,
@@ -40,14 +61,6 @@ snifter(x, ...)
 }
 \arguments{
 \item{x}{Input data matrix.}
-
-\item{...}{Unused.}
-
-\item{as_matrix}{Logical scalar. If \code{TRUE} (default), the fucntion 
-returns a matrix of t-SNE component co-ordinates.
-Otherwise, it returns an R binding to the \code{openTSNE.tsne.TSNEEmbedding}
-object. The latter is useful for embedding (see \code{\link{embed}} for
-more details).}
 
 \item{n_components}{Number of t-SNE components to be produced.}
 
@@ -130,8 +143,7 @@ number generator.}
 \item{verbose}{Logical scalar controlling verbosity.}
 }
 \value{
-A matrix of t-SNE embeddings if \code{as_matrix} is set to 
-\code{TRUE}.
+A matrix of t-SNE embeddings.
 }
 \description{
 See [the openTSNE documentation](https://opentsne.readthedocs.io/en/latest/)
@@ -140,16 +152,16 @@ algorithm.
 }
 \examples{
  set.seed(42)
- m <- matrix(rnorm(20000), ncol=20) 
+ m <- matrix(rnorm(2000), ncol=20) 
  out <- fi_tsne(m, random_state = 42L)
  plot(out, pch = 19, xlab = "t-SNE 1", ylab = "t-SNE 2")
 
- ## Using the python binding allows us to embed new points in the existing
+ ## openTSNE allows us to project new points into the existing
  ## embedding - useful for extremely large data.
  ## see https://opentsne.readthedocs.io/en/latest/api/index.html
 
- out_binding <- fi_tsne(m[-(1:2), ], as_matrix = FALSE, random_state = 42L)
- new_points <- embed(out_binding, m[1:2, ])
+ out_binding <- fi_tsne(m[-(1:2), ], random_state = 42L)
+ new_points <- project(out_binding, new = m[1:2, ], old = m[-(1:2), ])
  plot(as.matrix(out_binding), col = "black", pch = 19,
      xlab = "t-SNE 1", ylab = "t-SNE 2")
  points(new_points, col = "red", pch = 19)

@@ -106,8 +106,7 @@ legend(40, 50,
 The openTNSE package, and by extension snifter,
 also allows the embedding of new data into
 an existing t-SNE embedding.
-To do this, the option `as_matrix = FALSE` needs to be specified
-when calling `fi_tsne`. Here, we will split the data into "training"
+Here, we will split the data into "training"
 and "test" sets. Following this, we generate a t-SNE embedding
 using the training data, and project the test data into this embedding.
 
@@ -120,20 +119,16 @@ test_mat <- mat[train_ind, ]
 train_label <- data$level1class[train_ind]
 test_label <- data$level1class[test_ind]
 
-embedding <- fi_tsne(train_mat, as_matrix = FALSE, random_state = 42L)
+embedding <- fi_tsne(train_mat, random_state = 42L)
 ```
 
-The `embedding` object is of class `"openTSNE.tsne.TSNEEmbedding"`
-(it also inherits from `"numpy.ndarray"`). To access the numeric 
-t-SNE co-ordinates, we can simply call `as.matrix`. 
 Following generation of the embedding, we can now project the unseen test
 data into this t-SNE embedding.
 
 ```{r plot-embed}
-embedding_coords <- as.matrix(embedding)
-new_coords <- embed(embedding, test_mat)
+new_coords <- project(embedding, new = test_mat, old = train_mat)
 plot(
-    embedding_coords,
+    embedding,
     pch = 19,
     col = as.numeric(train_label),
     xlab = "t-SNE 1", ylab = "t-SNE 2",
@@ -160,4 +155,3 @@ legend(-40, 15,
 ```{r}
 sessionInfo()
 ```
-
