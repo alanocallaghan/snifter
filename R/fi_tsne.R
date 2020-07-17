@@ -64,10 +64,17 @@
 #' @return A matrix of t-SNE embeddings.
 #'
 #' @references
-#'  openTSNE: a modular Python library for t-SNE dimensionality reduction and 
+#'  openTSNE: a modular Python library for t-SNE dimensionality reduction and
 #'  embedding
 #'  Pavlin G. Poličar, Martin Stražar, Blaž Zupan
-#'  bioRxiv 731877; doi: https://doi.org/10.1101/731877  
+#'  bioRxiv (2019) 731877; doi: \url{https://doi.org/10.1101/731877}
+#'
+#'  Fast interpolation-based t-SNE for improved visualization of single-cell
+#'  RNA-seq data
+#'  George C. Linderman, Manas Rachh, Jeremy G. Hoskins, Stefan Steinerberger,
+#'  and Yuval Kluger
+#'  Nature Methods 16, 243–245 (2019)
+#'  doi: \url{https://doi.org/10.1038/s41592-018-0308-4}
 #' @examples
 #'  set.seed(42)
 #'  m <- matrix(rnorm(2000), ncol=20) 
@@ -191,16 +198,16 @@ snifter <- fi_tsne
 #'  used to compute the initial point positions to be used in the
 #'  embedding space. Can be "median", "weighted" or "random".
 #'  In all cases, "median" or "weighted" should be preferred.
-#' @param k The number of nearest neighbors to consider when 
-#'  initially placing the point onto the embedding. This is
+#' @param k Integer scalar specifying the number of nearest neighbors to
+#'  consider when initially placing the point onto the embedding. This is
 #'  different from "perplexity" because perplexity affects 
 #'  optimization while this only affects the initial point positions.
 #' @param learning_rate The learning rate for t-SNE optimization. 
 #'  When \code{learning_rate="auto"} the appropriate learning rate 
 #'  is selected according to max(200, N / 12), as determined in 
-#'  Belkina et al.
-#' @param early_exaggeration The exaggeration factor to use during 
-#'  the *early exaggeration* phase. Typical values range from 12 to
+#'  Belkina et al. Otherwise, a numeric scalar.
+#' @param early_exaggeration Numeric scalar; the exaggeration factor to use
+#'  during the *early exaggeration* phase. Typical values range from 12 to
 #'  32.
 #' @param early_exaggeration_iter The number of iterations to run 
 #'  in the *early exaggeration* phase.
@@ -224,6 +231,24 @@ snifter <- fi_tsne
 #' @param tolerance Numeric scalar specifying the numeric tolerance
 #'  used to ensure the affinities calculated on the old data match 
 #'  those of the original embedding.
+#' @references
+#'  openTSNE: a modular Python library for t-SNE dimensionality reduction and
+#'  embedding
+#'  Pavlin G. Poličar, Martin Stražar, Blaž Zupan
+#'  bioRxiv (2019) 731877; doi: \url{https://doi.org/10.1101/731877}
+#'
+#'  Fast interpolation-based t-SNE for improved visualization of single-cell
+#'  RNA-seq data
+#'  George C. Linderman, Manas Rachh, Jeremy G. Hoskins, Stefan Steinerberger,
+#'  and Yuval Kluger
+#'  Nature Methods 16, 243–245 (2019)
+#'  doi: \url{https://doi.org/10.1038/s41592-018-0308-4}
+#'
+#'  Automated optimized parameters for T-distributed stochastic neighbor
+#'  embedding improve visualization and analysis of large datasets.
+#'  Belkina, A.C., Ciccolella, C.O., Anno, R. et al.
+#'  Nature Communications 10, 5415 (2019).
+#'  doi: \url{https://doi.org/10.1038/s41467-019-13055-y}
 #' @examples
 #'  set.seed(42)
 #'  m <- matrix(rnorm(2000), ncol=20) 
@@ -311,7 +336,7 @@ project <- function(
                 k = k,
                 learning_rate = learning_rate,
                 early_exaggeration = early_exaggeration,
-                early_exaggeration_iter = early_exaggeration_iter,
+                early_exaggeration_iter = as.integer(early_exaggeration_iter),
                 exaggeration = exaggeration,
                 n_iter = n_iter,
                 initial_momentum = initial_momentum,

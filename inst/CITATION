@@ -24,7 +24,7 @@ bibentry(
         person("Yuval", "Kluger")
     ),
     title = "Fast interpolation-based t-SNE for improved visualization of single-cell RNA-seq data",
-    year = "2018",
+    year = "2019",
     doi = "10.1038/s41592-018-0308-4",
     URL = "https://www.nature.com/articles/s41592-018-0308-4",
     journal = "Nature Methods"
