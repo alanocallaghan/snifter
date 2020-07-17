@@ -176,6 +176,11 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
     reticulate::py_to_r_wrapper(x)
 }
 
+#' @export
+`[.openTSNE.tsne.TSNEEmbedding` <- function(x, ...) {
+    as.matrix(x)[...]
+}
+
 .create_tsne <- function(
         x,
         ...
