@@ -2,12 +2,12 @@
 % Please edit documentation in R/fi_tsne.R
 \name{embed}
 \alias{embed}
-\alias{embed.fi_tsne}
+\alias{embed.openTSNE.tsne.TSNEEmbedding}
 \title{Embed new data in an existing t-SNE embedding object.}
 \usage{
 embed(x, ...)
 
-\method{embed}{fi_tsne}(x, new)
+\method{embed}{openTSNE.tsne.TSNEEmbedding}(x, new)
 }
 \arguments{
 \item{x}{t-SNE embedding created with \code{\link{fi_tsne_embedding}}.}

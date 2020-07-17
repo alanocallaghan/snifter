@@ -66,10 +66,7 @@ fi_tsne.matrix <- function(
         verbose = verbose,
         ...
     )
-    structure(
-        .Data = list(obj = obj$fit(x)),
-        class = "fi_tsne"
-    )
+    obj$fit(x)
 }
 
 #' Embed new data in an existing t-SNE embedding object.
@@ -83,14 +80,28 @@ embed <- function(x, ...) {
 
 #' @export
 #' @rdname embed
-embed.fi_tsne <- function(x, new) {
-    x$obj$transform(new)
+embed.openTSNE.tsne.TSNEEmbedding <- function(x, new) {
+    proc <- basiliskStart(python_env)
+    basiliskRun(proc,
+        function(x, new) {
+            x$transform(new)
+        },
+        x = x,
+        new = new
+    )
 }
 
-# #' @export
-# print.fi_tsne <- function(x) {
-#     reticulate::py_to_r.numpy.ndarray(x$obj)
-# }
+#' @export
+print.openTSNE.tsne.TSNEEmbedding <- function(x) {
+    cat("reticulate binding to openTSNE.tsne.TSNEEmbedding.\n")
+    cat("Use as.matrix() for values.\n")
+}
+
+#' @export
+as.matrix.openTSNE.tsne.TSNEEmbedding <- function(x) {
+    reticulate:::py_to_r.default(x)
+}
+
 
 #' @importFrom reticulate py_to_r
 #' @export
@@ -103,9 +114,14 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
         ...
     ) {
     .check_args(x, ...)
-    basiliskStart(python_env)
-    oot <- reticulate::import("openTSNE")
-    oot$TSNE(...)
+    proc <- basiliskStart(python_env)
+    basiliskRun(proc,
+        function(...) {
+            openTSNE <- reticulate::import("openTSNE")
+            openTSNE$TSNE(...)
+        },
+        ...
+    )
 }
 
 .check_args <- function(
