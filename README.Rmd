@@ -14,6 +14,10 @@ knitr::opts_chunk$set(
 ```
 
 # snifter
+<!-- badges: start -->
+[![R build status](https://github.com/Alanocallaghan/snifter/workflows/R-CMD-check/badge.svg)](https://github.com/Alanocallaghan/snifter/actions)
+<!-- badges: end -->
+
 
 R binding for [openTSNE](https://opentsne.readthedocs.io/en/latest/index.html)
 using [basilisk](https://bioconductor.org/packages/devel/bioc/html/basilisk.html).

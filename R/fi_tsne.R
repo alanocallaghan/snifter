@@ -4,6 +4,11 @@
 #' for further details on these arguments and the general usage of this 
 #' algorithm.
 #' @param x Input data matrix.
+#' @param simplified Logical scalar. When \code{FALSE}, the function
+#' returns an object of class \code{snifter}. This contains all information
+#' necessary to project new data into the embedding using \code{\link{project}}
+#' If \code{TRUE}, all extra attributes will be omitted, and the return value
+#' is a base matrix.
 #' @param n_components Number of t-SNE components to be produced.
 #' @param n_jobs Integer scalar specifying the number of corest to be used.
 #' @param perplexity Numeric scalar controlling the neighborhood used
@@ -100,13 +105,14 @@
 #' @export
 snifter <- function(
         x,
+        simplified = FALSE,
         n_components = 2L,
         n_jobs = 1L,
         perplexity = 30,
         n_iter = 500L,
         initialization = c("pca", "spectral", "random"),
         neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
-        negative_gradient_method = c("bh", "fft"),
+        negative_gradient_method = c("fft", "bh"),
         learning_rate = "auto",
         early_exaggeration = 250,
         early_exaggeration_iter = 12L,
@@ -114,7 +120,7 @@ snifter <- function(
         dof = 1,
         theta = 0.5,
         n_interpolation_points = 3L,
-        min_num_intervals = 50,
+        min_num_intervals = 50L,
         ints_in_interval = 1,
         metric = "euclidean",
         metric_params = NULL,
@@ -129,6 +135,7 @@ snifter <- function(
     initialization <- match.arg(initialization)
     neighbors <- match.arg(neighbors)
     negative_gradient_method <- match.arg(negative_gradient_method)
+
     out <- .create_tsne(
         x = x,
         n_iter = n_iter,
@@ -155,6 +162,9 @@ snifter <- function(
         random_state = random_state,
         verbose = verbose
     )
+    if (simplified) {
+        return(out$x)
+    }
     structure(
         .Data = out$x,
         affinities = out$affinities,
@@ -270,78 +280,10 @@ project <- function(
         max_grad_norm = 0.25,
         tolerance = 1e-4
     ) {
-    stopifnot(inherits(x, "snifter"))
-    stopifnot(ncol(new) == ncol(old))
-    stopifnot(nrow(old) == nrow(x))
     new <- as.matrix(new)
     old <- as.matrix(old)
     initialization <- match.arg(initialization)
-
-    proc <- basiliskStart(python_env)
-    basiliskRun(proc,
-        function(x,
-                new,
-                old,
-                perplexity,
-                initialization,
-                k,
-                learning_rate,
-                early_exaggeration_iter,
-                early_exaggeration,
-                exaggeration,
-                n_iter,
-                initial_momentum,
-                final_momentum,
-                max_grad_norm,
-                tolerance
-            ) {
-            openTSNE <- reticulate::import("openTSNE")
-            affinities <- openTSNE$affinity$PerplexityBasedNN(
-                old,
-                perplexity = attr(x, "perplexity"),
-                method = attr(x, "neighbors"),
-                metric = attr(x, "metric"),
-                metric_params = attr(x, "metric_params")
-            )
-            affinities$P - attr(x, "affinities")
-            check <- all.equal(
-                as.matrix(affinities$P),
-                as.matrix(attr(x, "affinities")),
-                tolerance = tolerance
-            )
-            if (!check) {
-                stop("Affinities differ from original affinities (tolerance =", tolerance)
-            }
-            args <- list(embedding = x, affinities = affinities)
-            attr <- c(
-                "negative_gradient_method",
-                "dof",
-                "theta",
-                "n_interpolation_points",
-                "min_num_intervals"
-            )
-            attr_args <- lapply(attr, function(parameter) attr(x, parameter))
-            names(attr_args) <- attr
-            args <- c(args, attr_args)
-            x_embedding <- do.call(openTSNE$TSNEEmbedding, args)
-            x_embedding$transform(
-                new,
-                perplexity = perplexity,
-                initialization = initialization,
-                k = k,
-                learning_rate = learning_rate,
-                early_exaggeration = early_exaggeration,
-                early_exaggeration_iter = as.integer(early_exaggeration_iter),
-                exaggeration = exaggeration,
-                n_iter = n_iter,
-                initial_momentum = initial_momentum,
-                final_momentum = final_momentum,
-                max_grad_norm = max_grad_norm
-            )
-        },
-        x = x,
-        new = new,
-        old = old,
+    .project(x, new, old,
         perplexity = perplexity,
         initialization = initialization,
         k = k,
@@ -377,8 +319,9 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
         x,
         ...
     ) {
+    .checks_snifter(x, ...)
     proc <- basiliskStart(python_env)
-    basiliskRun(proc,
+    out <- basiliskRun(proc,
         function(x, ...) {
             openTSNE <- reticulate::import("openTSNE")
             obj <- openTSNE$TSNE(...)
@@ -391,8 +334,60 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
         x = x,
         ...
     )
+    basiliskStop(proc)
+    out
 }
-.check_params <- function(x,
+
+.project <- function(x, new, old, tolerance, ...) {
+    .checks_project(
+        x = x,
+        new = new,
+        old = old,
+        tolerance = tolerance,
+        ...
+    )
+    proc <- basiliskStart(python_env)
+    out <- basiliskRun(proc,
+        function(x, new, old, tolerance, ...) {
+            openTSNE <- reticulate::import("openTSNE")
+            affinities <- openTSNE$affinity$PerplexityBasedNN(
+                old,
+                perplexity = attr(x, "perplexity"),
+                method = attr(x, "neighbors"),
+                metric = attr(x, "metric"),
+                metric_params = attr(x, "metric_params")
+            )
+            affinities$P - attr(x, "affinities")
+            check <- all.equal(
+                as.matrix(affinities$P),
+                as.matrix(attr(x, "affinities")),
+                tolerance = tolerance
+            )
+            if (!check) {
+                stop("Affinities differ from original affinities (tolerance =", tolerance)
+            }
+            args <- list(embedding = x, affinities = affinities)
+            attr <- c(
+                "negative_gradient_method",
+                "dof",
+                "theta",
+                "n_interpolation_points",
+                "min_num_intervals"
+            )
+            attr_args <- lapply(attr, function(parameter) attr(x, parameter))
+            names(attr_args) <- attr
+            args <- c(args, attr_args)
+            x_embedding <- do.call(openTSNE$TSNEEmbedding, args)
+            x_embedding$transform(new, ...)
+        },
+        x = x, new = new, old = old, tolerance = tolerance,
+        ...
+    )
+    basiliskStop(proc)
+    out
+}
+
+.checks_snifter <- function(x,
         n_iter,
         n_components,
         n_jobs,
@@ -419,29 +414,115 @@ py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
     ) {
     assert_that(
         is.numeric(x),
+        length(n_iter) == 1,
         is.integer(n_iter),
+        n_iter > 0,
+        length(n_components) == 1,
         is.integer(n_components),
+        n_components > 0,
+        length(n_jobs) == 1,
         is.integer(abs(n_jobs)),
-        is.numeric(learning_rate) | is.character(learning_rate),
+        (n_jobs %in% c(-1L, -2L)) | n_jobs > 0,
+        length(learning_rate) == 1,
+        (is.numeric(learning_rate) & learning_rate > 0) |
+            learning_rate == "auto",
+        length(perplexity) == 1,
         is.numeric(perplexity),
+        perplexity > 0,
+        length(early_exaggeration) == 1,
         is.numeric(early_exaggeration),
+        early_exaggeration > 0,
+        length(early_exaggeration_iter) == 1,
         is.integer(early_exaggeration_iter),
-        is.null(exaggeration) | is.numeric(exaggeration),
+        early_exaggeration_iter >= 0,
+        is.null(exaggeration) ||
+            (is.numeric(exaggeration) &
+                exaggeration > 0 &
+                length(exaggeration) == 1),
+        length(dof) == 1,
         is.numeric(dof),
+        dof > 0,
+        length(theta) == 1,
         is.numeric(theta),
+        theta > 0,
+        length(n_interpolation_points) == 1,
         is.integer(n_interpolation_points),
+        n_interpolation_points > 0,
+        length(min_num_intervals) == 1,
         is.integer(min_num_intervals),
+        min_num_intervals > 0,
+        length(ints_in_interval) == 1,
         is.numeric(ints_in_interval),
+        min_num_intervals > 0,
         is.character(initialization) | is.matrix(initialization),
         is.character(metric),
-        is.null(metric_params) | is.character(metric_params),
+        is.null(metric_params) |
+            is.character(metric_params) |
+            is.list(metric_params),
+        length(initial_momentum) == 1,
         is.numeric(initial_momentum),
+        initial_momentum > 0,
+        length(final_momentum) == 1,
         is.numeric(final_momentum),
+        final_momentum > 0,
         is.null(max_grad_norm) | is.numeric(max_grad_norm),
-        is.character(neighbors),
-        is.character(negative_gradient_method),
         is.null(random_state) | is.integer(random_state),
         is.logical(verbose)
+    )
+}
+
+.checks_project <- function(
+        x,
+        new,
+        old,
+        perplexity,
+        initialization,
+        k,
+        learning_rate,
+        early_exaggeration,
+        early_exaggeration_iter,
+        exaggeration,
+        n_iter,
+        initial_momentum,
+        final_momentum,
+        max_grad_norm,
+        tolerance
+    ) {
+    assert_that(
+        is.numeric(x),
+        inherits(x, "snifter"),
+        ncol(new) == ncol(old),
+        nrow(old) == nrow(x),
+        length(perplexity) == 1,
+        is.numeric(perplexity),
+        perplexity > 0,
+        length(k) == 1,
+        is.integer(k),
+        k > 0,
+        length(learning_rate) == 1,
+        is.numeric(learning_rate),
+        learning_rate > 0,
+        length(early_exaggeration) == 1,
+        is.numeric(early_exaggeration),
+        early_exaggeration > 0,
+        length(early_exaggeration_iter) == 1,
+        is.integer(early_exaggeration_iter),
+        early_exaggeration_iter >= 0,
+        length(n_iter) == 1,
+        is.integer(n_iter),
+        n_iter > 0,
+        length(initial_momentum) == 1,
+        is.numeric(initial_momentum),
+        initial_momentum > 0,
+        length(final_momentum) == 1,
+        is.numeric(final_momentum),
+        final_momentum > 0,
+        length(max_grad_norm) == 1,
+        is.numeric(max_grad_norm),
+        max_grad_norm > 0,
+        length(tolerance) == 1,
+        is.numeric(tolerance),
+        tolerance > 0
     )
 }
 

@@ -7,13 +7,14 @@
 \usage{
 snifter(
   x,
+  simplified = FALSE,
   n_components = 2L,
   n_jobs = 1L,
   perplexity = 30,
   n_iter = 500L,
   initialization = c("pca", "spectral", "random"),
   neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
-  negative_gradient_method = c("bh", "fft"),
+  negative_gradient_method = c("fft", "bh"),
   learning_rate = "auto",
   early_exaggeration = 250,
   early_exaggeration_iter = 12L,
@@ -21,7 +22,7 @@ snifter(
   dof = 1,
   theta = 0.5,
   n_interpolation_points = 3L,
-  min_num_intervals = 50,
+  min_num_intervals = 50L,
   ints_in_interval = 1,
   metric = "euclidean",
   metric_params = NULL,
@@ -34,13 +35,14 @@ snifter(
 
 fi_tsne(
   x,
+  simplified = FALSE,
   n_components = 2L,
   n_jobs = 1L,
   perplexity = 30,
   n_iter = 500L,
   initialization = c("pca", "spectral", "random"),
   neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
-  negative_gradient_method = c("bh", "fft"),
+  negative_gradient_method = c("fft", "bh"),
   learning_rate = "auto",
   early_exaggeration = 250,
   early_exaggeration_iter = 12L,
@@ -48,7 +50,7 @@ fi_tsne(
   dof = 1,
   theta = 0.5,
   n_interpolation_points = 3L,
-  min_num_intervals = 50,
+  min_num_intervals = 50L,
   ints_in_interval = 1,
   metric = "euclidean",
   metric_params = NULL,
@@ -61,6 +63,12 @@ fi_tsne(
 }
 \arguments{
 \item{x}{Input data matrix.}
+
+\item{simplified}{Logical scalar. When \code{FALSE}, the function
+returns an object of class \code{snifter}. This contains all information
+necessary to project new data into the embedding using \code{\link{project}}
+If \code{TRUE}, all extra attributes will be omitted, and the return value
+is a base matrix.}
 
 \item{n_components}{Number of t-SNE components to be produced.}
 

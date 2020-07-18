@@ -31,4 +31,5 @@ Suggests:
     BiocStyle,
     scater,
     scran,
-    scuttle
+    scuttle,
+    testthat

@@ -2,3 +2,4 @@
 ^Meta$
 Makefile
 README.Rmd
+^\.github$
