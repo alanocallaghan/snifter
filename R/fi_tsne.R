@@ -1,6 +1,6 @@
 #' Run FI-tSNE algorithm
 #' 
-#' See [the openTSNE documentation](https://opentsne.readthedocs.io/en/latest/)
+#' See \href{https://opentsne.readthedocs.io/en/latest/}{the openTSNE documentation}
 #' for further details on these arguments and the general usage of this 
 #' algorithm.
 #' @param x Input data matrix.
@@ -75,6 +75,11 @@
 #'  and Yuval Kluger
 #'  Nature Methods 16, 243–245 (2019)
 #'  doi: \url{https://doi.org/10.1038/s41592-018-0308-4}
+#' 
+#'  Accelerating t-SNE using Tree-Based Algorithms
+#'  Laurens van der Maaten
+#'  Journal of Machine Learning Research (2014)
+#'  \url{http://jmlr.org/papers/v15/vandermaaten14a.html}
 #' @examples
 #'  set.seed(42)
 #'  m <- matrix(rnorm(2000), ncol=20) 
@@ -90,8 +95,10 @@
 #'  plot(as.matrix(out_binding), col = "black", pch = 19,
 #'      xlab = "t-SNE 1", ylab = "t-SNE 2")
 #'  points(new_points, col = "red", pch = 19)
+#' 
+#' @rdname snifter
 #' @export
-fi_tsne <- function(
+snifter <- function(
         x,
         n_components = 2L,
         n_jobs = 1L,
@@ -176,9 +183,9 @@ fi_tsne <- function(
     )
 }
 
-#' @rdname fi_tsne
+#' @rdname snifter
 #' @export
-snifter <- fi_tsne
+fi_tsne <- snifter
 
 
 #' Project new data into an existing t-SNE embedding object.
@@ -232,18 +239,6 @@ snifter <- fi_tsne
 #'  used to ensure the affinities calculated on the old data match 
 #'  those of the original embedding.
 #' @references
-#'  openTSNE: a modular Python library for t-SNE dimensionality reduction and
-#'  embedding
-#'  Pavlin G. Poličar, Martin Stražar, Blaž Zupan
-#'  bioRxiv (2019) 731877; doi: \url{https://doi.org/10.1101/731877}
-#'
-#'  Fast interpolation-based t-SNE for improved visualization of single-cell
-#'  RNA-seq data
-#'  George C. Linderman, Manas Rachh, Jeremy G. Hoskins, Stefan Steinerberger,
-#'  and Yuval Kluger
-#'  Nature Methods 16, 243–245 (2019)
-#'  doi: \url{https://doi.org/10.1038/s41592-018-0308-4}
-#'
 #'  Automated optimized parameters for T-distributed stochastic neighbor
 #'  embedding improve visualization and analysis of large datasets.
 #'  Belkina, A.C., Ciccolella, C.O., Anno, R. et al.

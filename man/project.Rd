@@ -41,18 +41,18 @@ used to compute the initial point positions to be used in the
 embedding space. Can be "median", "weighted" or "random".
 In all cases, "median" or "weighted" should be preferred.}
 
-\item{k}{The number of nearest neighbors to consider when 
-initially placing the point onto the embedding. This is
+\item{k}{Integer scalar specifying the number of nearest neighbors to
+consider when initially placing the point onto the embedding. This is
 different from "perplexity" because perplexity affects 
 optimization while this only affects the initial point positions.}
 
 \item{learning_rate}{The learning rate for t-SNE optimization. 
 When \code{learning_rate="auto"} the appropriate learning rate 
 is selected according to max(200, N / 12), as determined in 
-Belkina et al.}
+Belkina et al. Otherwise, a numeric scalar.}
 
-\item{early_exaggeration}{The exaggeration factor to use during 
-the *early exaggeration* phase. Typical values range from 12 to
+\item{early_exaggeration}{Numeric scalar; the exaggeration factor to use
+during the *early exaggeration* phase. Typical values range from 12 to
 32.}
 
 \item{early_exaggeration_iter}{The number of iterations to run 
@@ -99,4 +99,11 @@ Project new data into an existing t-SNE embedding object.
  plot(as.matrix(out_binding), col = "black", pch = 19,
      xlab = "t-SNE 1", ylab = "t-SNE 2")
  points(new_points, col = "red", pch = 19)
+}
+\references{
+Automated optimized parameters for T-distributed stochastic neighbor
+ embedding improve visualization and analysis of large datasets.
+ Belkina, A.C., Ciccolella, C.O., Anno, R. et al.
+ Nature Communications 10, 5415 (2019).
+ doi: \url{https://doi.org/10.1038/s41467-019-13055-y}
 }

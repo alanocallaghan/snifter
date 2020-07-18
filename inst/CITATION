@@ -29,3 +29,15 @@ bibentry(
     URL = "https://www.nature.com/articles/s41592-018-0308-4",
     journal = "Nature Methods"
 )
+
+bibentry(
+    bibtype = "article",
+    author  = person("Laurens", "van der Maaten"),
+    title   = "Accelerating t-SNE using Tree-Based Algorithms",
+    journal = "Journal of Machine Learning Research",
+    year    = "2014",
+    volume  = "15",
+    number  = "93",
+    pages   = "3221-3245",
+    url     = "http://jmlr.org/papers/v15/vandermaaten14a.html"
+)
