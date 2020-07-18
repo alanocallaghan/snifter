@@ -80,15 +80,15 @@ data$level1class <- factor(data$level1class)
 
 # Running t-SNE
 
-The main functionality of the package lies in the `fi_tsne` function.
-This function returns a matrix of t-SNE co-ordinates. In this case,
+The main functionality of the package lies in the `snifter` (or `fi_tsne`) 
+function. This function returns a matrix of t-SNE co-ordinates. In this case,
 we pass in the 20 principal components computed based on the 
 log-normalised counts. We colour points based on the discrete 
 cell types identified by the authors.
 
 ```{r run}
 mat <- reducedDim(data)
-snifter <- fi_tsne(mat, random_state = 42L)
+snifter <- snifter(mat, random_state = 42L)
 plot(snifter,
     pch = 19,
     xlab = "t-SNE 1", ylab = "t-SNE 2",
@@ -119,10 +119,10 @@ test_mat <- mat[train_ind, ]
 train_label <- data$level1class[train_ind]
 test_label <- data$level1class[test_ind]
 
-embedding <- fi_tsne(train_mat, random_state = 42L)
+embedding <- snifter(train_mat, random_state = 42L)
 ```
 
-Following generation of the embedding, we can now project the unseen test
+Once we have generated the embedding, we can now `project` the unseen test
 data into this t-SNE embedding.
 
 ```{r plot-embed}
