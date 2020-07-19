@@ -305,7 +305,6 @@ print.snifter <- function(x, ...) {
     print(as.matrix(x))
 }
 
-#' @importFrom reticulate py_to_r
 #' @export
 py_to_r.openTSNE.tsne.TSNEEmbedding <- function(x) {
     reticulate::py_to_r_wrapper(x)
