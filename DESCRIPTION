@@ -12,10 +12,7 @@ Imports:
     reticulate,
     assertthat
 Description:
-    Provides an R wrapper for the implementation of FI-tSNE from the
-    python package openTNSE. See Poličar et al. (2019) <doi:10.1101/731877>
-    and the algorithm described by Linderman et al. (2018)
-    <doi:10.1038/s41592-018-0308-4>.
+    Provides an R wrapper for the implementation of FI-tSNE from the python package openTNSE. See Poličar et al. (2019) <doi:10.1101/731877> and the algorithm described by Linderman et al. (2018) <doi:10.1038/s41592-018-0308-4>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
