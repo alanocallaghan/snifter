@@ -57,6 +57,8 @@ library("scRNAseq")
 library("scran")
 library("scuttle")
 library("scater")
+library("ggplot2")
+theme_set(theme_bw())
 set.seed(42)
 ```
 
@@ -87,18 +89,12 @@ log-normalised counts. We colour points based on the discrete
 cell types identified by the authors.
 
 ```{r run}
-mat <- reducedDim(data)
-fit <- fitsne(mat, random_state = 42L)
-plot(fit,
-    pch = 19,
-    xlab = "t-SNE 1", ylab = "t-SNE 2",
-    col = as.numeric(data$level1class)
-)
-legend(40, 50,
-    legend = levels(data$level1class),
-    col = seq_len(nlevels(data$level1class)),
-    pch = 19
-)
+fit <- fitsne(reducedDim(data), random_state = 42L)
+ggplot() +
+    aes(fit[, 1], fit[, 2], colour = data$level1class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Cell type") +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
 ```
 
 # Projecting new data into an existing embedding
@@ -114,7 +110,7 @@ using the training data, and project the test data into this embedding.
 test_ind <- sample(nrow(mat), nrow(mat) / 2)
 train_ind <- setdiff(seq_len(nrow(mat)), test_ind)
 train_mat <- mat[train_ind, ]
-test_mat <- mat[train_ind, ]
+test_mat <- mat[test_ind, ]
 
 train_label <- data$level1class[train_ind]
 test_label <- data$level1class[test_ind]
@@ -127,26 +123,22 @@ data into this t-SNE embedding.
 
 ```{r plot-embed}
 new_coords <- project(embedding, new = test_mat, old = train_mat)
-plot(
-    embedding,
-    pch = 19,
-    col = as.numeric(train_label),
-    xlab = "t-SNE 1", ylab = "t-SNE 2",
-)
-legend(-40, 40,
-    legend = levels(data$level1class),
-    col = seq_len(nlevels(data$level1class)),
-    pch = 19
-)
-points(
-    new_coords,
-    pch = 17,
-    col = as.numeric(test_label)
-)
-legend(-40, 15,
-    legend = c("Train", "Test"),
-    pch = c(19, 17)
-)
+ggplot() +
+    geom_point(
+        aes(embedding[, 1], embedding[, 2],
+            colour = train_label,
+            shape = "Train"
+        )
+    ) +
+    geom_point(
+        aes(new_coords[, 1], new_coords[, 2], 
+            colour = test_label,
+            shape = "Test"
+        )
+    ) +
+    scale_colour_discrete(name = "Cell type") +
+    scale_shape_discrete(name = NULL) +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
 ```
 
 
