@@ -89,7 +89,8 @@ log-normalised counts. We colour points based on the discrete
 cell types identified by the authors.
 
 ```{r run}
-fit <- fitsne(reducedDim(data), random_state = 42L)
+mat <- reducedDim(data)
+fit <- fitsne(mat, random_state = 42L)
 ggplot() +
     aes(fit[, 1], fit[, 2], colour = data$level1class) +
     geom_point(pch = 19) +

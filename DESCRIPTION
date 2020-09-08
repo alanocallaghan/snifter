@@ -29,4 +29,5 @@ Suggests:
     scater,
     scran,
     scuttle,
+    ggplot2,
     testthat
