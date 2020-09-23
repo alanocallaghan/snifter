@@ -30,4 +30,5 @@ Suggests:
     scran,
     scuttle,
     ggplot2,
+    snifter,
     testthat
