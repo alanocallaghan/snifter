@@ -1,6 +1,9 @@
 on:
   push:
-    branches: master
+    branches:
+      master
+  schedule:
+    - cron: '0 8 * * 5'
 
 name: pkgdown
 
@@ -16,9 +19,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@master
 
-      - name: Install remotes
+      - name: Install remotes/BiocManager
         run: |
-          install.packages('remotes')
+          install.packages(c("remotes", "BiocManager"))
         shell: Rscript {0}
 
       - name: Query dependencies
