@@ -32,7 +32,7 @@ jobs:
       - name: Set BiocManager version
         run: |
           install.packages('BiocManager')
-          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
+          BiocManager::install(version = "devel", ask = FALSE)
         shell: Rscript {0}
 
       - name: Cache R packages
