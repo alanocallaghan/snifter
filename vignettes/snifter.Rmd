@@ -82,7 +82,7 @@ data$level1class <- factor(data$level1class)
 
 # Running t-SNE
 
-The main functionality of the package lies in the`fitsne`
+The main functionality of the package lies in the `fitsne`
 function. This function returns a matrix of t-SNE co-ordinates. In this case,
 we pass in the 20 principal components computed based on the 
 log-normalised counts. We colour points based on the discrete 
