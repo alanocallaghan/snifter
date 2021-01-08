@@ -48,7 +48,7 @@ is a base matrix.}
 
 \item{n_components}{Number of t-SNE components to be produced.}
 
-\item{n_jobs}{Integer scalar specifying the number of corest to be used.}
+\item{n_jobs}{Integer scalar specifying the number of cores to be used.}
 
 \item{perplexity}{Numeric scalar controlling the neighborhood used
 when estimating the embedding.}
@@ -64,7 +64,7 @@ algorithm to use.}
 \item{negative_gradient_method}{Character scalar specifying the 
 negative gradient approximation to use. "bh", referring to Barnes-Hut,
 is more appropriate for smaller data sets, while "fft" referring
-to fast Fourier transform, is more appropriate.}
+to fast Fourier transform, is more appropriate for larger datasets.}
 
 \item{learning_rate}{Numeric scalar specifying the learning rate, or the
 string "auto", which uses \code{max(200, N / 12)}, where \code{N} is
@@ -82,8 +82,7 @@ during the normal optimization phase. This can be used to form more densely
 packed clusters and is useful for large data sets.}
 
 \item{dof}{Numeric scalar specifying the degrees of freedom, as described in
-Kobak et al. “Heavy-tailed kernels reveal a finer cluster structure in t-SNE
-visualisations”, 2019.}
+Kobak et al. (2019).}
 
 \item{theta}{Numeric scalar, only used when negative_gradient_method="bh". 
 This is the trade-off parameter between speed and accuracy of the tree 
@@ -185,4 +184,10 @@ openTSNE: a modular Python library for t-SNE dimensionality reduction and
  Laurens van der Maaten
  Journal of Machine Learning Research (2014)
  \url{http://jmlr.org/papers/v15/vandermaaten14a.html}
+
+ Heavy-tailed kernels reveal a finer cluster structure in t-SNE visualisations
+ Dmitry Kobak, George Linderman, Stefan Steinerberger, Yuval Kluger and
+ Philipp Berens
+ arXiv (2019)
+ doi: \url{https://doi.org/10.1007/978-3-030-46150-8_8}.
 }
