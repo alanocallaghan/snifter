@@ -10,7 +10,7 @@
 #' If \code{TRUE}, all extra attributes will be omitted, and the return value
 #' is a base matrix.
 #' @param n_components Number of t-SNE components to be produced.
-#' @param n_jobs Integer scalar specifying the number of corest to be used.
+#' @param n_jobs Integer scalar specifying the number of cores to be used.
 #' @param perplexity Numeric scalar controlling the neighborhood used
 #'  when estimating the embedding.
 #' @param n_iter Integer scalar specifying the number of iterations to complete.
@@ -21,7 +21,7 @@
 #' @param negative_gradient_method Character scalar specifying the 
 #'  negative gradient approximation to use. "bh", referring to Barnes-Hut,
 #'  is more appropriate for smaller data sets, while "fft" referring
-#'  to fast Fourier transform, is more appropriate.
+#'  to fast Fourier transform, is more appropriate for larger datasets.
 #' @param learning_rate Numeric scalar specifying the learning rate, or the
 #'  string "auto", which uses \code{max(200, N / 12)}, where \code{N} is
 #'  the number of observations.
@@ -34,8 +34,7 @@
 #'  during the normal optimization phase. This can be used to form more densely 
 #'  packed clusters and is useful for large data sets.
 #' @param dof Numeric scalar specifying the degrees of freedom, as described in
-#'  Kobak et al. “Heavy-tailed kernels reveal a finer cluster structure in t-SNE
-#'  visualisations”, 2019.
+#'  Kobak et al. (2019).
 #' @param theta Numeric scalar, only used when negative_gradient_method="bh". 
 #'  This is the trade-off parameter between speed and accuracy of the tree 
 #'  approximation method. Typical values range from 0.2 to 0.8. The value 0 
@@ -80,11 +79,17 @@
 #'  and Yuval Kluger
 #'  Nature Methods 16, 243–245 (2019)
 #'  doi: \url{https://doi.org/10.1038/s41592-018-0308-4}
-#' 
+#'
 #'  Accelerating t-SNE using Tree-Based Algorithms
 #'  Laurens van der Maaten
 #'  Journal of Machine Learning Research (2014)
 #'  \url{http://jmlr.org/papers/v15/vandermaaten14a.html}
+#'
+#'  Heavy-tailed kernels reveal a finer cluster structure in t-SNE visualisations
+#'  Dmitry Kobak, George Linderman, Stefan Steinerberger, Yuval Kluger and
+#'  Philipp Berens
+#'  arXiv (2019)
+#'  doi: \url{https://doi.org/10.1007/978-3-030-46150-8_8}.
 #' @examples
 #'  set.seed(42)
 #'  m <- matrix(rnorm(2000), ncol=20) 
@@ -135,6 +140,12 @@ fitsne <- function(
     initialization <- match.arg(initialization)
     neighbors <- match.arg(neighbors)
     negative_gradient_method <- match.arg(negative_gradient_method)
+    random_state <- as.integer(random_state)
+    early_exaggeration_iter <- as.integer(early_exaggeration_iter)
+    n_jobs <- as.integer(n_jobs)
+    n_components <- as.integer(n_components)
+    min_num_intervals <- as.integer(min_num_intervals)
+    n_iter <- as.integer(n_iter)
 
     out <- .create_tsne(
         x = x,
