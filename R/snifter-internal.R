@@ -28,3 +28,10 @@ NULL
 #'  \url{http://jmlr.org/papers/v15/vandermaaten14a.html}
 #' @docType package
 NULL
+
+
+.onLoad <- function(...) {
+    if (Sys.getenv("OMP_NUM_THREADS") == "") {
+        Sys.setenv(OMP_NUM_THREADS = 1)
+    }
+}
