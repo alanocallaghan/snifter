@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, image: 'bioconductor/bioconductor_docker:devel'}
+          # - { os: ubuntu-latest, image: 'bioconductor/bioconductor_docker:devel'}
           - { os: macOS-latest, r: 'devel', bioc: 'devel'}
           # - { os: windows-latest, r: 'release', bioc: 'devel'}
           # - { os: ubuntu-latest, r: 'release', bioc: 'devel'}
@@ -30,6 +30,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       OMP_THREAD_LIMIT: 2
+      OMP_NUM_THREADS: 1
       _R_CHECK_EXECUTABLES_: false
       _R_CHECK_EXECUTABLES_EXCLUSIONS_: false
       _R_CHECK_LENGTH_1_CONDITION_: package:_R_CHECK_PACKAGE_NAME_,abort,verbose
