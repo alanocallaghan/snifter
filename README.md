@@ -5,6 +5,8 @@ snifter
 
 [![R build
 status](https://github.com/Alanocallaghan/snifter/workflows/R-CMD-check/badge.svg)](https://github.com/Alanocallaghan/snifter/actions)
+[![BioC
+status](http://www.bioconductor.org/shields/build/release/bioc/snifter.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/snifter)
 <!-- badges: end -->
 
 R binding for
