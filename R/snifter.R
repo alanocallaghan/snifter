@@ -1,7 +1,7 @@
 #' Run FI-tSNE algorithm
 #' 
 #' See \href{https://opentsne.readthedocs.io/en/latest/}{the openTSNE documentation}
-#' for further details on these arguments and the general usage of this 
+#' for further details on these arguments and the general usage of this
 #' algorithm.
 #' @param x Input data matrix.
 #' @param simplified Logical scalar. When \code{FALSE}, the function
@@ -16,9 +16,16 @@
 #' @param n_iter Integer scalar specifying the number of iterations to complete.
 #' @param initialization Character scalar specifying the initialization
 #'  to use. "pca" may preserve global distance better than other options.
+#' @param pca Logical scalar specifying whether PCA should be run on the data
+#'  before creating the embedding.
+#' @param partial_pca Logical scalar specifying whether
+#'  \code{\link[irlba]{prcomp_irlba}} should be used if \code{pca=TRUE}.
+#'  This is useful for very large data matrices.
+#' @param pca_center,pca_scale Logical scalars specifying whether centering and
+#'  scaling should be performed before running PCA, if \code{pca=TRUE}.
 #' @param neighbors Character scalar specifying the nearest neighbour
 #'  algorithm to use.
-#' @param negative_gradient_method Character scalar specifying the 
+#' @param negative_gradient_method Character scalar specifying the
 #'  negative gradient approximation to use. "bh", referring to Barnes-Hut,
 #'  is more appropriate for smaller data sets, while "fft" referring
 #'  to fast Fourier transform, is more appropriate for larger datasets.
@@ -28,39 +35,39 @@
 #' @param early_exaggeration Numeric scalar specifying the exaggeration factor
 #'  to use during the early exaggeration phase. Typical values range from 12 to
 #'  32.
-#' @param early_exaggeration_iter Integer scalar specifying the number of 
+#' @param early_exaggeration_iter Integer scalar specifying the number of
 #'  iterations to run in the early exaggeration phase.
-#' @param exaggeration Numeric scalar specifying the exaggeration factor to use 
-#'  during the normal optimization phase. This can be used to form more densely 
+#' @param exaggeration Numeric scalar specifying the exaggeration factor to use
+#'  during the normal optimization phase. This can be used to form more densely
 #'  packed clusters and is useful for large data sets.
 #' @param dof Numeric scalar specifying the degrees of freedom, as described in
 #'  Kobak et al. (2019).
-#' @param theta Numeric scalar, only used when negative_gradient_method="bh". 
-#'  This is the trade-off parameter between speed and accuracy of the tree 
-#'  approximation method. Typical values range from 0.2 to 0.8. The value 0 
-#'  indicates that no approximation is to be made and produces exact results 
+#' @param theta Numeric scalar, only used when negative_gradient_method="bh".
+#'  This is the trade-off parameter between speed and accuracy of the tree
+#'  approximation method. Typical values range from 0.2 to 0.8. The value 0
+#'  indicates that no approximation is to be made and produces exact results
 #'  also producing longer runtime.
 #' @param n_interpolation_points Integer scalar, only used when
-#'  negative_gradient_method="fft". The number of 
-#'  interpolation points to use within each grid cell for interpolation based 
+#'  negative_gradient_method="fft". The number of
+#'  interpolation points to use within each grid cell for interpolation based
 #'  t-SNE. It is highly recommended leaving this value at the default 3.
 #' @param min_num_intervals Integer scalar, only used when
-#'  negative_gradient_method="fft". The minimum number of grid cells to use, 
-#'  regardless of the ints_in_interval parameter. Higher values provide more 
+#'  negative_gradient_method="fft". The minimum number of grid cells to use,
+#'  regardless of the ints_in_interval parameter. Higher values provide more
 #'  accurate gradient estimations.
 #' @param ints_in_interval Numeric scalar, only used when
 #'  negative_gradient_method="fft". Indicates how large a grid cell should be
-#'  e.g. a value of 3 indicates a grid side length of 3. Lower values provide 
+#'  e.g. a value of 3 indicates a grid side length of 3. Lower values provide
 #'  more accurate gradient estimations.
-#' @param metric Character scalar specifying the metric to be used to compute 
+#' @param metric Character scalar specifying the metric to be used to compute
 #'  affinities between points in the original space.
-#' @param metric_params Named list of additional keyword arguments for the 
+#' @param metric_params Named list of additional keyword arguments for the
 #'  metric function.
 #' @param initial_momentum Numeric scalar specifying the momentum to use during
 #'  the early exaggeration phase.
-#' @param final_momentum Numeric scalar specifying the momentum to use during 
+#' @param final_momentum Numeric scalar specifying the momentum to use during
 #'  the normal optimization phase.
-#' @param max_grad_norm Numeric scalar specifying the maximum gradient norm. 
+#' @param max_grad_norm Numeric scalar specifying the maximum gradient norm.
 #'  If the norm exceeds this value, it will be clipped.
 #' @param random_state Integer scalar specifying the seed used by the random
 #'  number generator.
@@ -85,27 +92,28 @@
 #'  Journal of Machine Learning Research (2014)
 #'  \url{http://jmlr.org/papers/v15/vandermaaten14a.html}
 #'
-#'  Heavy-tailed kernels reveal a finer cluster structure in t-SNE visualisations
+#'  Heavy-tailed kernels reveal a finer cluster structure in t-SNE
+#'  visualisations
 #'  Dmitry Kobak, George Linderman, Stefan Steinerberger, Yuval Kluger and
 #'  Philipp Berens
 #'  arXiv (2019)
 #'  doi: \url{https://doi.org/10.1007/978-3-030-46150-8_8}.
 #' @examples
 #'  set.seed(42)
-#'  m <- matrix(rnorm(2000), ncol=20) 
+#'  m <- matrix(rnorm(2000), ncol=20)
 #'  out <- fitsne(m, random_state = 42L)
 #'  plot(out, pch = 19, xlab = "t-SNE 1", ylab = "t-SNE 2")
-#' 
+#'
 #'  ## openTSNE allows us to project new points into the existing
 #'  ## embedding - useful for extremely large data.
 #'  ## see https://opentsne.readthedocs.io/en/latest/api/index.html
-#' 
+#'
 #'  out_binding <- fitsne(m[-(1:2), ], random_state = 42L)
 #'  new_points <- project(out_binding, new = m[1:2, ], old = m[-(1:2), ])
 #'  plot(as.matrix(out_binding), col = "black", pch = 19,
 #'      xlab = "t-SNE 1", ylab = "t-SNE 2")
 #'  points(new_points, col = "red", pch = 19)
-#' 
+#'
 #' @rdname snifter
 #' @export
 fitsne <- function(
@@ -116,6 +124,10 @@ fitsne <- function(
         perplexity = 30,
         n_iter = 500L,
         initialization = c("pca", "spectral", "random"),
+        pca = FALSE,
+        partial_pca = FALSE,
+        pca_center = TRUE,
+        pca_scale = TRUE,
         neighbors = c("auto", "exact", "annoy", "pynndescent", "approx"),
         negative_gradient_method = c("fft", "bh"),
         learning_rate = "auto",
@@ -146,6 +158,35 @@ fitsne <- function(
     n_components <- as.integer(n_components)
     min_num_intervals <- as.integer(min_num_intervals)
     n_iter <- as.integer(n_iter)
+
+    if (pca) {
+        if (verbose) cat("Performing PCA\n")
+        if (partial_pca) {
+            if (!requireNamespace("irlba", quietly = TRUE)) {
+                stop(
+                    "Package \"irlba\" is required for partial PCA.",
+                    " Please install it.",
+                    call. = FALSE)
+            }
+            x <- irlba::prcomp_irlba(
+                x,
+                n = initial_dims,
+                center = pca_center,
+                scale = pca_scale
+            )$x
+        } else {
+            if (verbose & min(dim(X)) > 2500) {
+                cat("Consider setting partial_pca=TRUE for large matrices\n")
+            }
+            x <- prcomp(
+                x,
+                retx = TRUE,
+                center = pca_center,
+                scale. = pca_scale,
+                rank. = initial_dims
+            )$x
+        }
+    }
 
     out <- .create_tsne(
         x = x,
@@ -317,7 +358,7 @@ print.snifter <- function(x, ...) {
     )
 }
 # max_grad_norm for embedding new points
-# when adding points into an existing embedding and the new points overlap 
-# with the reference points, leading to large gradients. This can make points 
-# “shoot off” from the embedding, causing the interpolation method to compute 
+# when adding points into an existing embedding and the new points overlap
+# with the reference points, leading to large gradients. This can make points
+# “shoot off” from the embedding, causing the interpolation method to compute
 # a very large grid, and leads to worse results.
