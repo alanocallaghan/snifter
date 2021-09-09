@@ -21,6 +21,8 @@
 #' @param partial_pca Logical scalar specifying whether
 #'  \code{\link[irlba]{prcomp_irlba}} should be used if \code{pca=TRUE}.
 #'  This is useful for very large data matrices.
+#' @param pca_dims Integer scalar specifying the number of principal components
+#'  to be calculated in the initial PCA step if \code{pca=TRUE}.
 #' @param pca_center,pca_scale Logical scalars specifying whether centering and
 #'  scaling should be performed before running PCA, if \code{pca=TRUE}.
 #' @param neighbors Character scalar specifying the nearest neighbour
@@ -125,6 +127,7 @@ fitsne <- function(
         n_iter = 500L,
         initialization = c("pca", "spectral", "random"),
         pca = FALSE,
+        pca_dims = 50L,
         partial_pca = FALSE,
         pca_center = TRUE,
         pca_scale = TRUE,
@@ -170,7 +173,7 @@ fitsne <- function(
             }
             x <- irlba::prcomp_irlba(
                 x,
-                n = initial_dims,
+                n = pca_dims,
                 center = pca_center,
                 scale = pca_scale
             )$x
@@ -183,7 +186,7 @@ fitsne <- function(
                 retx = TRUE,
                 center = pca_center,
                 scale. = pca_scale,
-                rank. = initial_dims
+                rank. = pca_dims
             )$x
         }
     }
