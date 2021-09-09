@@ -175,7 +175,7 @@ fitsne <- function(
                 scale = pca_scale
             )$x
         } else {
-            if (verbose & min(dim(X)) > 2500) {
+            if (verbose & min(dim(x)) > 2500) {
                 cat("Consider setting partial_pca=TRUE for large matrices\n")
             }
             x <- prcomp(
