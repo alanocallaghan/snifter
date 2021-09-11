@@ -181,7 +181,7 @@ fitsne <- function(
             if (verbose & min(dim(x)) > 2500) {
                 cat("Consider setting partial_pca=TRUE for large matrices\n")
             }
-            x <- prcomp(
+            x <- stats::prcomp(
                 x,
                 retx = TRUE,
                 center = pca_center,
