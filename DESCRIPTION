@@ -1,16 +1,17 @@
 Package: snifter
 Type: Package
 Title: R wrapper for the python openTSNE library
-Version: 1.3.2
-Date: 2021-09-09
+Version: 1.3.3
+Date: 2021-09-11
 Authors@R: c(
     person("Alan", "O'Callaghan", role = c("aut", "cre"), email = "alan.ocallaghan@outlook.com"),
     person("Aaron", "Lun", role = c("aut")))
 Depends: R (>= 4.0.0)
-Imports: 
+Imports:
     basilisk,
     reticulate,
     irlba,
+    stats,
     assertthat
 Description:
     Provides an R wrapper for the implementation of FI-tSNE from the python package openTNSE. See Poličar et al. (2019) <doi:10.1101/731877> and the algorithm described by Linderman et al. (2018) <doi:10.1038/s41592-018-0308-4>.
