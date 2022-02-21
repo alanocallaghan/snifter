@@ -10,6 +10,7 @@ Depends: R (>= 4.0.0)
 Imports: 
     basilisk,
     reticulate,
+    irlba,
     assertthat
 Description:
     Provides an R wrapper for the implementation of FI-tSNE from the python package openTNSE. See Poličar et al. (2019) <doi:10.1101/731877> and the algorithm described by Linderman et al. (2018) <doi:10.1038/s41592-018-0308-4>.
@@ -24,11 +25,7 @@ BugReports: https://github.com/Alanocallaghan/snifter/issues
 Suggests: 
     knitr,
     rmarkdown,
-    scRNAseq,
     BiocStyle,
-    scater,
-    scran,
-    scuttle,
     ggplot2,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

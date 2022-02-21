@@ -41,43 +41,26 @@ to gain a full understanding of the available options.
 
 # Setting up the data
 
-We will illustrate the use of snifter
-using data from `r Biocpkg("scRNAseq")` and
-single cell utility functions provided by `r Biocpkg("scuttle")`,
-`r Biocpkg("scater")` and 
-`r Biocpkg("scran")` - first we load these libraries
-and set a random seed to ensure the t-SNE visualisation is reproducible
+We will illustrate the use of snifter by generating some toy data.
+First, we'll load the needed libraries, and set a random seed to
+ensure the simulated data are reproducible
 (note: it is good practice to ensure that a t-SNE embedding is robust
 by running the algorithm multiple times).
 
-
 ```{r setup}
 library("snifter")
-library("scRNAseq")
-library("scran")
-library("scuttle")
-library("scater")
 library("ggplot2")
 theme_set(theme_bw())
 set.seed(42)
-```
 
-Before running t-SNE, we first load data generated 
-by [Zeisel et al.](https://doi.org/10.1126/science.aaa1934) 
-from `r Biocpkg("scRNAseq")`. We filter this data to remove genes
-expressed only in a small number of cells,
-estimate normalisation factors using `r Biocpkg("scran")`
-and generate 20 principal components. We will use these principal
-components to generate the t-SNE embedding later.
-
-```{r data}
-data <- ZeiselBrainData()
-data <- data[rowMeans(counts(data) != 0) > 0.05, ]
-data <- computeSumFactors(data, cluster = quickCluster(data))
-data <- logNormCounts(data)
-data <- runPCA(data, ncomponents = 20)
-## Convert this to a factor to use as colouring variable later
-data$level1class <- factor(data$level1class)
+n_obs <- 500
+n_feats <- 200
+means_1 <- rnorm(n_feats)
+means_2 <- rnorm(n_feats)
+counts_a <- replicate(n_obs, rnorm(n_feats, means_1))
+counts_b <- replicate(n_obs, rnorm(n_feats, means_2))
+counts <- t(cbind(counts_a, counts_b))
+label <- rep(c("A", "B"), each = n_obs)
 ```
 
 # Running t-SNE
@@ -89,12 +72,11 @@ log-normalised counts. We colour points based on the discrete
 cell types identified by the authors.
 
 ```{r run}
-mat <- reducedDim(data)
-fit <- fitsne(mat, random_state = 42L)
+fit <- fitsne(counts, random_state = 42L)
 ggplot() +
-    aes(fit[, 1], fit[, 2], colour = data$level1class) +
+    aes(fit[, 1], fit[, 2], colour = label) +
     geom_point(pch = 19) +
-    scale_colour_discrete(name = "Cell type") +
+    scale_colour_discrete(name = "Cluster") +
     labs(x = "t-SNE 1", y = "t-SNE 2")
 ```
 
@@ -108,13 +90,13 @@ and "test" sets. Following this, we generate a t-SNE embedding
 using the training data, and project the test data into this embedding.
 
 ```{r split}
-test_ind <- sample(nrow(mat), nrow(mat) / 2)
-train_ind <- setdiff(seq_len(nrow(mat)), test_ind)
-train_mat <- mat[train_ind, ]
-test_mat <- mat[test_ind, ]
+test_ind <- sample(nrow(counts), nrow(counts) / 2)
+train_ind <- setdiff(seq_len(nrow(counts)), test_ind)
+train_mat <- counts[train_ind, ]
+test_mat <- counts[test_ind, ]
 
-train_label <- data$level1class[train_ind]
-test_label <- data$level1class[test_ind]
+train_label <- label[train_ind]
+test_label <- label[test_ind]
 
 embedding <- fitsne(train_mat, random_state = 42L)
 ```
@@ -137,7 +119,7 @@ ggplot() +
             shape = "Test"
         )
     ) +
-    scale_colour_discrete(name = "Cell type") +
+    scale_colour_discrete(name = "Cluster") +
     scale_shape_discrete(name = NULL) +
     labs(x = "t-SNE 1", y = "t-SNE 2")
 ```
