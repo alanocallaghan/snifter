@@ -6,6 +6,6 @@ python_env <- BasiliskEnvironment(
       "opentsne=0.6.2",
       "scikit-learn=1.1.2",
       if (basilisk.utils::isWindows()) "scipy=1.7.3" else "scipy=1.7.3",
-      "numpy=1.23.1"
+      "numpy=1.22.0"
     )
 )
