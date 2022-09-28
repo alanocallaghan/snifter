@@ -2,9 +2,10 @@ python_env <- BasiliskEnvironment(
     "fitsne",
     pkgname = "snifter",
     packages = c(
-      "opentsne=0.4.3",
-      "scikit-learn=0.23.1",
-      if (basilisk.utils::isWindows()) "scipy=1.5.0" else "scipy=1.5.1",
-      "numpy=1.19.0"
+      "python=3.10.6",
+      "opentsne=0.6.2",
+      "scikit-learn=1.1.2",
+      if (basilisk.utils::isWindows()) "scipy=1.7.3" else "scipy=1.7.3",
+      "numpy=1.23.1"
     )
 )

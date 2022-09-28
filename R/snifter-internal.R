@@ -7,6 +7,7 @@ NULL
 #' 
 #' @title snifter: fast interpolated t-SNE in R
 #' 
+#' @description
 #' An R package for running openTSNE's implementation of fast interpolated
 #' t-SNE.
 #' @references

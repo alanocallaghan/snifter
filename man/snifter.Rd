@@ -4,10 +4,7 @@
 \name{snifter}
 \alias{snifter}
 \alias{fitsne}
-\title{snifter: fast interpolated t-SNE in R
-
-An R package for running openTSNE's implementation of fast interpolated
-t-SNE.}
+\title{snifter: fast interpolated t-SNE in R}
 \usage{
 fitsne(
   x,
@@ -147,6 +144,9 @@ number generator.}
 A matrix of t-SNE embeddings.
 }
 \description{
+An R package for running openTSNE's implementation of fast interpolated
+t-SNE.
+
 See \href{https://opentsne.readthedocs.io/en/latest/}{the openTSNE documentation}
 for further details on these arguments and the general usage of this
 algorithm.
