@@ -1,7 +1,7 @@
 Package: snifter
 Type: Package
 Title: R wrapper for the python openTSNE library
-Version: 1.10.0
+Version: 1.11.0
 Date: 2022-10-26
 Authors@R: c(
     person("Alan", "O'Callaghan", role = c("aut", "cre"), email = "alan.ocallaghan@outlook.com"),
