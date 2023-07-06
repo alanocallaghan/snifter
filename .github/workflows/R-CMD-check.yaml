@@ -62,7 +62,7 @@ jobs:
         if: matrix.config.image == null
 
       - name: Check
-        uses: r-lib/actions/check-r-package@v1
+        uses: r-lib/actions/check-r-package@v2
 
       - name: BiocCheck
         if: runner.os == 'Linux'
