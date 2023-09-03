@@ -80,6 +80,7 @@ ggplot() +
     labs(x = "t-SNE 1", y = "t-SNE 2")
 ```
 
+
 # Projecting new data into an existing embedding
 
 The openTNSE package, and by extension snifter,
