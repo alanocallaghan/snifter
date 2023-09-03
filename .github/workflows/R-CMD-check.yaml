@@ -62,7 +62,6 @@ jobs:
         uses: r-lib/actions/setup-pandoc@v2
         if: matrix.config.image == null
 
-
       - name: basilisk utils
         if: matrix.config.os == 'windows-latest' && matrix.config.bioc == 'devel'
         run: |
