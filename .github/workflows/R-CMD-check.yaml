@@ -51,7 +51,6 @@ jobs:
         with:
           extra-packages: rcmdcheck, optparse, magick, BiocManager, devtools
 
-
       - name: Install BiocCheck
         if: runner.os == 'Linux'
         run: BiocManager::install("BiocCheck")
