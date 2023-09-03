@@ -68,7 +68,7 @@ jobs:
         run: |
           devtools::install_github("alanocallaghan/basilisk.utils")
         shell: Rscript {0}
-        
+
       - name: Debug
         if: matrix.config.os == 'windows-latest' && matrix.config.bioc == 'devel'
         run: |
