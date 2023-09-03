@@ -61,6 +61,14 @@ jobs:
         uses: r-lib/actions/setup-pandoc@v2
         if: matrix.config.image == null
 
+      - name: Debug
+        if: matrix.config.os == 'windows-latest' && matrix.config.bioc == 'devel'
+        run: |
+          devtools::load_all()
+          m <- matrix(rnorm(2000), ncol=20)
+          out <- fitsne(m, random_state = 42L)
+        shell: Rscript {0}
+        
       - name: Check
         uses: r-lib/actions/check-r-package@v2
 
