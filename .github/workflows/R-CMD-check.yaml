@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          # - { os: windows-latest, bioc: 'release'}
-          # - { os: windows-latest, bioc: 'devel'}
+          - { os: windows-latest, bioc: 'release'}
+          - { os: windows-latest, bioc: 'devel'}
           - { os: macOS-latest, bioc: 'release'}
           - { os: macOS-latest, bioc: 'devel'}
           - { os: ubuntu-latest, bioc: 'release'}
@@ -59,12 +59,6 @@ jobs:
       - name: Set up pandoc
         uses: r-lib/actions/setup-pandoc@v2
         if: matrix.config.image == null
-
-      - name: basilisk utils
-        if: matrix.config.os == 'windows-latest' && matrix.config.bioc == 'devel'
-        run: |
-          devtools::install_github("alanocallaghan/basilisk.utils")
-        shell: Rscript {0}
 
       - name: Check
         uses: r-lib/actions/check-r-package@v2
